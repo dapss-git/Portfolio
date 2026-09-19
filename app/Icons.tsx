@@ -328,3 +328,42 @@ export function DownloadIcon({ className = "w-5 h-5", size }: IconProps) {
     </svg>
   );
 }
+
+// Saweria Icon — cloud mascot with Saweria brand colors (#faae2b yellow / #2b6cb0 blue)
+export function SaweriaIcon({ className = "w-5 h-5", size }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {/* Cloud body */}
+      <path
+        d="M32 26H10C6.686 26 4 23.314 4 20C4 17.1 6.014 14.686 8.72 14.1C8.256 13.12 8 12.03 8 10.88C8 7.08 11.08 4 14.88 4C16.95 4 18.81 4.9 20.1 6.36C21.18 5.5 22.55 5 24.04 5C27.37 5 30.1 7.44 30.48 10.66C33.6 11.22 36 13.92 36 17.2C36 21.98 34.42 26 32 26Z"
+        fill="#faae2b"
+      />
+      {/* Eyes */}
+      <circle cx="15" cy="18" r="2.5" fill="#2b6cb0" />
+      <circle cx="25" cy="18" r="2.5" fill="#2b6cb0" />
+      {/* Eye shine */}
+      <circle cx="16" cy="17" r="0.8" fill="white" />
+      <circle cx="26" cy="17" r="0.8" fill="white" />
+      {/* Smile */}
+      <path
+        d="M16 22.5C16 22.5 17.5 24.5 20 24.5C22.5 24.5 24 22.5 24 22.5"
+        stroke="#2b6cb0"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      {/* Legs */}
+      <path d="M15 26V33" stroke="#faae2b" strokeWidth="3" strokeLinecap="round" />
+      <path d="M25 26V33" stroke="#faae2b" strokeWidth="3" strokeLinecap="round" />
+      {/* Feet */}
+      <path d="M12 33H18" stroke="#2b6cb0" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M22 33H28" stroke="#2b6cb0" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  );
+}

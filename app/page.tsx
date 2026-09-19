@@ -21,6 +21,7 @@ import {
   SparklesIcon,
   ArrowLeftIcon,
   DownloadIcon,
+  SaweriaIcon,
 } from "./Icons";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -308,6 +309,35 @@ function PaymentSection() {
               </div>
             ))}
           </div>
+
+          {/* Saweria Card */}
+          <a
+            href="https://saweria.co/dafapratama"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center gap-4 bg-[#12121a] border border-[#1e1e2e] hover:border-[#faae2b]/60 rounded-2xl p-5 mb-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(250,174,43,0.15)] group"
+          >
+            <div className="flex-shrink-0 p-2 rounded-xl bg-[#faae2b]/10 border border-[#faae2b]/30 group-hover:bg-[#faae2b]/20 transition-colors">
+              <SaweriaIcon className="w-8 h-8" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-sm font-bold text-white">Saweria</p>
+              <p className="text-xs text-[#faae2b] font-mono">saweria.co/dafapratama</p>
+              <p className="text-xs text-gray-500 mt-0.5">Donasi via Saweria</p>
+            </div>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-4 h-4 text-gray-600 group-hover:text-[#faae2b] transition-colors flex-shrink-0"
+            >
+              <path d="M7 7h10v10" />
+              <path d="M7 17 17 7" />
+            </svg>
+          </a>
 
           {/* QRIS Card — click to open fullscreen modal */}
           <button
