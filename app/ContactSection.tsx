@@ -25,21 +25,30 @@ export default function ContactSection() {
     setStatus("loading");
     setErrorMsg("");
 
-    const text = `📩 *Pesan Portfolio Baru!*\n\n👤 Nama: ${form.name}\n💬 Pesan:\n${form.message}\n\n📅 Waktu: ${new Date().toLocaleString("id-ID")}`;
-
     try {
       const res = await fetch("/api/send-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({
+          name: form.name.trim(),
+          message: form.message.trim(),
+        }),
       });
-      if (!res.ok) throw new Error("Gagal kirim");
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Gagal mengirim pesan");
+      }
+
       setStatus("success");
       setForm({ name: "", message: "" });
-    } catch {
+    } catch (err: unknown) {
       setStatus("error");
-      setErrorMsg("Gagal mengirim pesan. Coba lagi.");
-      setTimeout(() => setStatus("verified"), 2000);
+      const msg =
+        err instanceof Error ? err.message : "Gagal mengirim pesan. Coba lagi.";
+      setErrorMsg(msg);
+      setTimeout(() => setStatus("verified"), 3000);
     }
   };
 
@@ -133,7 +142,7 @@ export default function ContactSection() {
                 </svg>
               </div>
               <div>
-                <p className="text-[#00ff88] font-bold text-lg">Pesan Terkirim! 🎉</p>
+                <p className="text-[#00ff88] font-bold text-lg">Pesan Terkirim!</p>
                 <p className="text-gray-400 text-sm mt-1">
                   Aku akan balas secepatnya via WhatsApp / Telegram.
                 </p>
@@ -187,8 +196,11 @@ export default function ContactSection() {
                 {(status === "idle" || status === "error") ? (
                   <SliderVerify onVerified={handleVerified} />
                 ) : status === "verified" ? (
-                  <div className="text-center mb-3">
-                    <span className="text-xs text-[#00ff88] font-mono">✅ Siap dikirim!</span>
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <svg className="w-4 h-4 text-[#00ff88]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-xs text-[#00ff88] font-mono font-semibold">Siap dikirim!</span>
                   </div>
                 ) : null}
               </div>

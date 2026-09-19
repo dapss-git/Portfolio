@@ -1,146 +1,183 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 
 interface SliderVerifyProps {
   onVerified: () => void;
 }
 
 export default function SliderVerify({ onVerified }: SliderVerifyProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [verified, setVerified] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragX, setDragX] = useState(0);
+
   const trackRef = useRef<HTMLDivElement>(null);
-  const startXRef = useRef<number>(0);
+  const startXRef = useRef(0);
+  const isDraggingRef = useRef(false);
+  const dragXRef = useRef(0);
+  const verifiedRef = useRef(false);
 
-  const handleStart = useCallback(
-    (clientX: number) => {
-      if (verified) return;
-      setIsDragging(true);
-      setFailed(false);
-      startXRef.current = clientX - (progress / 100) * (trackRef.current?.offsetWidth ?? 0);
-    },
-    [verified, progress]
-  );
+  const THUMB_WIDTH = 48; // 48px width of thumb
 
-  const handleMove = useCallback(
-    (clientX: number) => {
-      if (!isDragging || verified) return;
-      const track = trackRef.current;
-      if (!track) return;
-      const trackWidth = track.offsetWidth;
-      const thumbWidth = 56; // w-14
-      const maxX = trackWidth - thumbWidth;
-      const rawX = clientX - startXRef.current;
-      const clampedX = Math.max(0, Math.min(rawX, maxX));
-      const pct = (clampedX / maxX) * 100;
-      setProgress(pct);
-    },
-    [isDragging, verified]
-  );
+  const getMaxDist = () => {
+    if (!trackRef.current) return 240;
+    // 8px = 4px padding on each side
+    return Math.max(0, trackRef.current.clientWidth - THUMB_WIDTH - 8);
+  };
 
-  const handleEnd = useCallback(() => {
-    if (!isDragging || verified) return;
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (verifiedRef.current) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+
+    const track = trackRef.current;
+    if (!track) return;
+
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    setFailed(false);
+
+    const rect = track.getBoundingClientRect();
+    const touchXOnTrack = e.clientX - rect.left - 4; // account for 4px padding
+    const maxDist = getMaxDist();
+
+    // If tapped near or ahead of current position, update position immediately
+    const targetX = Math.max(0, Math.min(touchXOnTrack - THUMB_WIDTH / 2, maxDist));
+    // If touched near current thumb, keep offset smoothly
+    if (Math.abs(touchXOnTrack - dragXRef.current) < THUMB_WIDTH) {
+      startXRef.current = e.clientX - dragXRef.current;
+    } else {
+      dragXRef.current = targetX;
+      setDragX(targetX);
+      startXRef.current = e.clientX - targetX;
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current || verifiedRef.current) return;
+    const maxDist = getMaxDist();
+    const rawX = e.clientX - startXRef.current;
+    const clampedX = Math.max(0, Math.min(rawX, maxDist));
+    dragXRef.current = clampedX;
+    setDragX(clampedX);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current || verifiedRef.current) return;
+    isDraggingRef.current = false;
     setIsDragging(false);
-    if (progress >= 95) {
+
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+
+    const maxDist = getMaxDist();
+    const isCompleted = maxDist > 0 && dragXRef.current >= maxDist * 0.85;
+
+    if (isCompleted) {
+      verifiedRef.current = true;
       setVerified(true);
-      setProgress(100);
-      setTimeout(() => onVerified(), 500);
+      dragXRef.current = maxDist;
+      setDragX(maxDist);
+      setTimeout(() => {
+        onVerified();
+      }, 400);
     } else {
       setFailed(true);
-      setProgress(0);
+      dragXRef.current = 0;
+      setDragX(0);
       setTimeout(() => setFailed(false), 800);
     }
-  }, [isDragging, verified, progress, onVerified]);
+  };
 
-  // Mouse events
-  const onMouseDown = (e: React.MouseEvent) => handleStart(e.clientX);
-  const onMouseMove = (e: React.MouseEvent) => handleMove(e.clientX);
-  const onMouseUp = () => handleEnd();
-
-  // Touch events
-  const onTouchStart = (e: React.TouchEvent) => handleStart(e.touches[0].clientX);
-  const onTouchMove = (e: React.TouchEvent) => handleMove(e.touches[0].clientX);
-  const onTouchEnd = () => handleEnd();
-
-  const thumbLeft = `calc(${progress}% * (100% - 56px) / 100)`;
+  const maxDist = getMaxDist();
+  const progressPct = maxDist > 0 ? (dragX / maxDist) * 100 : 0;
 
   return (
-    <div className="select-none">
-      <p className="text-xs text-gray-500 mb-2 font-mono text-center">
+    <div className="select-none touch-none">
+      <p className="text-xs text-gray-400 mb-2 font-mono text-center">
         {verified
-          ? "✅ Terverifikasi!"
+          ? "Terverifikasi!"
           : failed
-          ? "❌ Ulangi — geser sampai penuh"
-          : "Geser ke kanan untuk kirim pesan →"}
+          ? "Kurang jauh — geser sampai penuh"
+          : "Geser ke kanan untuk verifikasi"}
       </p>
 
       <div
         ref={trackRef}
-        className={`relative h-14 rounded-xl overflow-hidden cursor-grab active:cursor-grabbing transition-colors duration-300 ${
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className={`relative h-14 rounded-2xl overflow-hidden p-1 touch-none cursor-pointer transition-colors duration-300 ${
           verified
-            ? "bg-[#00ff88]/20 border border-[#00ff88]/40"
+            ? "bg-[#00ff88]/15 border border-[#00ff88]/40 cursor-default"
             : failed
-            ? "bg-red-500/20 border border-red-500/40"
-            : "bg-[#1e1e2e] border border-[#4f8ef7]/20"
+            ? "bg-red-500/15 border border-red-500/40"
+            : "bg-[#161622] border border-[#2a2a3e] hover:border-[#4f8ef7]/40"
         }`}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
       >
-        {/* Fill gradient */}
+        {/* Progress Fill */}
         <div
-          className="absolute inset-y-0 left-0 transition-all duration-75"
+          className="absolute inset-y-0 left-0 rounded-2xl pointer-events-none"
           style={{
-            width: `${progress}%`,
+            width: `${dragX + THUMB_WIDTH}px`,
             background: verified
               ? "linear-gradient(90deg, rgba(0,255,136,0.3), rgba(0,255,136,0.1))"
               : failed
               ? "linear-gradient(90deg, rgba(239,68,68,0.3), rgba(239,68,68,0.1))"
-              : "linear-gradient(90deg, rgba(79,142,247,0.3), rgba(124,92,191,0.1))",
+              : "linear-gradient(90deg, rgba(79,142,247,0.35), rgba(124,92,191,0.2))",
+            transition: isDragging ? "none" : "width 0.25s ease-out",
           }}
         />
 
-        {/* Track text */}
+        {/* Track hint label */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span
-            className={`text-xs font-mono font-medium transition-opacity duration-300 ${
-              progress > 40 ? "opacity-0" : "opacity-60"
-            } ${verified ? "text-[#00ff88]" : "text-gray-500"}`}
+            className={`text-xs font-mono tracking-widest uppercase transition-opacity duration-200 ${
+              progressPct > 35 ? "opacity-0" : "opacity-50 text-gray-400"
+            }`}
           >
-            {verified ? "✓ Verified" : "— — — — — — — — — →"}
+            Geser ke kanan →
           </span>
         </div>
 
-        {/* Shimmer on track */}
-        {!verified && !failed && (
-          <div className="absolute inset-0 animate-shimmer pointer-events-none" />
-        )}
-
-        {/* Thumb */}
+        {/* Draggable Thumb */}
         <div
-          className={`absolute top-1 bottom-1 w-12 rounded-lg flex items-center justify-center transition-all duration-75 ${
+          className={`absolute top-1 bottom-1 w-12 rounded-xl flex items-center justify-center pointer-events-none touch-none select-none z-10 transition-shadow duration-200 ${
             verified
               ? "bg-[#00ff88] shadow-[0_0_20px_rgba(0,255,136,0.6)]"
               : failed
               ? "bg-red-500"
               : isDragging
-              ? "bg-[#4f8ef7] shadow-[0_0_20px_rgba(79,142,247,0.6)] scale-95"
-              : "bg-[#4f8ef7] glow-blue hover:shadow-[0_0_24px_rgba(79,142,247,0.6)]"
+              ? "bg-[#4f8ef7] shadow-[0_0_20px_rgba(79,142,247,0.8)] scale-95"
+              : "bg-[#4f8ef7] shadow-[0_0_15px_rgba(79,142,247,0.4)]"
           }`}
-          style={{ left: thumbLeft }}
-          onMouseDown={onMouseDown}
-          onTouchStart={onTouchStart}
-          onTouchMove={onTouchMove}
-          onTouchEnd={onTouchEnd}
+          style={{
+            transform: `translateX(${dragX}px)`,
+            transition: isDragging ? "none" : "transform 0.25s ease-out",
+          }}
         >
           {verified ? (
-            <svg className="w-5 h-5 text-[#0a0a0f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <svg
+              className="w-5 h-5 text-[#0d0d14]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={3}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           ) : (
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           )}
