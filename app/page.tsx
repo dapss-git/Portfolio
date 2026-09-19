@@ -312,7 +312,7 @@ function PaymentSection() {
 
           {/* Saweria Card */}
           <a
-            href="https://saweria.co/dafapratama"
+            href="https://saweria.co/dafaaaaa1111"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full flex items-center gap-4 bg-[#12121a] border border-[#1e1e2e] hover:border-[#faae2b]/60 rounded-2xl p-5 mb-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(250,174,43,0.15)] group"
@@ -322,7 +322,7 @@ function PaymentSection() {
             </div>
             <div className="flex-1 text-left">
               <p className="text-sm font-bold text-white">Saweria</p>
-              <p className="text-xs text-[#faae2b] font-mono">saweria.co/dafapratama</p>
+              <p className="text-xs text-[#faae2b] font-mono">saweria.co/dafaaaaa1111</p>
               <p className="text-xs text-gray-500 mt-0.5">Donasi via Saweria</p>
             </div>
             <svg
