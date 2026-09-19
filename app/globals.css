@@ -136,34 +136,43 @@ body {
 }
 
 /* 3D Split-Flap / Calendar Page Flip Animations */
-@keyframes flip-top-flap {
+@keyframes flip-card-drop {
   0% {
     transform: rotateX(0deg);
   }
   100% {
-    transform: rotateX(-90deg);
+    transform: rotateX(-180deg);
   }
 }
 
-@keyframes flip-bottom-flap {
+@keyframes flip-shadow-darken {
   0% {
-    transform: rotateX(90deg);
+    opacity: 0;
   }
   100% {
-    transform: rotateX(0deg);
+    opacity: 0.85;
   }
 }
 
-.animate-flip-top {
-  animation: flip-top-flap 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+@keyframes flip-shadow-lighten {
+  0% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-flip-card {
+  animation: flip-card-drop 0.55s cubic-bezier(0.37, 0, 0.63, 1) forwards;
   transform-origin: bottom;
-  backface-visibility: hidden;
   transform-style: preserve-3d;
 }
 
-.animate-flip-bottom {
-  animation: flip-bottom-flap 0.28s 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  transform-origin: top;
-  backface-visibility: hidden;
-  transform-style: preserve-3d;
+.animate-flip-shadow-in {
+  animation: flip-shadow-darken 0.28s ease-in forwards;
+}
+
+.animate-flip-shadow-out {
+  animation: flip-shadow-lighten 0.28s 0.25s ease-out forwards;
 }

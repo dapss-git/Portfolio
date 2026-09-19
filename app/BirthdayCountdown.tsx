@@ -38,63 +38,88 @@ function calculateTimeUntilBirthday(): TimeRemaining {
 // ─── Single Split-Flap Calendar Card ──────────────────────────────────────────
 function FlipUnit({ value, label }: { value: number; label: string }) {
   const formatted = String(value).padStart(2, "0");
-  const [current, setCurrent] = useState(formatted);
-  const [previous, setPrevious] = useState(formatted);
-  const [isFlipping, setIsFlipping] = useState(false);
+  const [currentVal, setCurrentVal] = useState(formatted);
+  const [prevVal, setPrevVal] = useState(formatted);
+  const [flipping, setFlipping] = useState(false);
+  const [flipKey, setFlipKey] = useState(0);
 
   useEffect(() => {
-    if (formatted !== current) {
-      setPrevious(current);
-      setCurrent(formatted);
-      setIsFlipping(true);
+    if (formatted !== currentVal) {
+      setPrevVal(currentVal);
+      setCurrentVal(formatted);
+      setFlipping(true);
+      setFlipKey((k) => k + 1);
+
       const timer = setTimeout(() => {
-        setIsFlipping(false);
-      }, 560);
+        setFlipping(false);
+      }, 550);
+
       return () => clearTimeout(timer);
     }
-  }, [formatted, current]);
+  }, [formatted, currentVal]);
 
   return (
     <div className="flex flex-col items-center">
       {/* 3D Flip Card Container */}
       <div
-        className="relative w-[56px] h-[64px] sm:w-[68px] sm:h-[76px] rounded-xl select-none"
-        style={{ perspective: "450px" }}
+        className="relative w-[58px] h-[68px] sm:w-[70px] sm:h-[78px] rounded-xl select-none"
+        style={{ perspective: "600px" }}
       >
-        {/* 1. Static Background Top (Shows CURRENT new value top half) */}
+        {/* 1. Static Upper Half (Behind flap — shows NEW value top half) */}
         <div className="absolute top-0 left-0 right-0 h-1/2 overflow-hidden rounded-t-xl bg-[#1a1a2b] border-t border-x border-[#2d2d42]">
-          <div className="w-full h-[64px] sm:h-[76px] flex items-center justify-center font-mono text-2xl sm:text-3xl font-black text-white tracking-wider">
-            {current}
+          <div className="w-full h-[68px] sm:h-[78px] flex items-center justify-center font-mono text-2xl sm:text-3xl font-black text-white tracking-wider">
+            {currentVal}
           </div>
         </div>
 
-        {/* 2. Static Background Bottom (Shows PREVIOUS while flipping, then CURRENT) */}
+        {/* 2. Static Lower Half (Shows OLD value while flipping, then NEW value) */}
         <div className="absolute bottom-0 left-0 right-0 h-1/2 overflow-hidden rounded-b-xl bg-[#11111d] border-b border-x border-[#2d2d42]">
-          <div className="w-full h-[64px] sm:h-[76px] -mt-[32px] sm:-mt-[38px] flex items-center justify-center font-mono text-2xl sm:text-3xl font-black text-white tracking-wider">
-            {isFlipping ? previous : current}
+          <div className="w-full h-[68px] sm:h-[78px] -mt-[34px] sm:-mt-[39px] flex items-center justify-center font-mono text-2xl sm:text-3xl font-black text-white tracking-wider">
+            {flipping ? prevVal : currentVal}
           </div>
         </div>
 
-        {/* 3. Flipping Upper Flap (Folds down over bottom half) */}
-        {isFlipping && (
-          <div className="absolute top-0 left-0 right-0 h-1/2 overflow-hidden rounded-t-xl bg-[#1a1a2b] border-t border-x border-[#2d2d42] animate-flip-top z-10 shadow-lg">
-            <div className="w-full h-[64px] sm:h-[76px] flex items-center justify-center font-mono text-2xl sm:text-3xl font-black text-white tracking-wider">
-              {previous}
+        {/* 3. The Flipping Flap (Swings down 180deg from top to bottom) */}
+        {flipping && (
+          <div
+            key={flipKey}
+            className="absolute top-0 left-0 right-0 h-1/2 animate-flip-card z-10"
+            style={{
+              transformOrigin: "bottom",
+              transformStyle: "preserve-3d",
+            }}
+          >
+            {/* Front Face: shows OLD value top half, rotates away */}
+            <div
+              className="absolute inset-0 overflow-hidden rounded-t-xl bg-[#1a1a2b] border-t border-x border-[#2d2d42]"
+              style={{ backfaceVisibility: "hidden" }}
+            >
+              <div className="w-full h-[68px] sm:h-[78px] flex items-center justify-center font-mono text-2xl sm:text-3xl font-black text-white tracking-wider">
+                {prevVal}
+              </div>
+              {/* Darkening Shadow Overlay */}
+              <div className="absolute inset-0 bg-black/60 animate-flip-shadow-in pointer-events-none" />
             </div>
-          </div>
-        )}
 
-        {/* 4. Flipping Lower Flap (Slaps into place with new value) */}
-        {isFlipping && (
-          <div className="absolute bottom-0 left-0 right-0 h-1/2 overflow-hidden rounded-b-xl bg-[#11111d] border-b border-x border-[#2d2d42] animate-flip-bottom z-10 shadow-lg">
-            <div className="w-full h-[64px] sm:h-[76px] -mt-[32px] sm:-mt-[38px] flex items-center justify-center font-mono text-2xl sm:text-3xl font-black text-white tracking-wider">
-              {current}
+            {/* Back Face: shows NEW value bottom half, swings down and lands on bottom */}
+            <div
+              className="absolute inset-0 overflow-hidden rounded-b-xl bg-[#11111d] border-b border-x border-[#2d2d42]"
+              style={{
+                backfaceVisibility: "hidden",
+                transform: "rotateX(180deg)",
+              }}
+            >
+              <div className="w-full h-[68px] sm:h-[78px] -mt-[34px] sm:-mt-[39px] flex items-center justify-center font-mono text-2xl sm:text-3xl font-black text-white tracking-wider">
+                {currentVal}
+              </div>
+              {/* Lightening Shadow Overlay */}
+              <div className="absolute inset-0 bg-black/60 animate-flip-shadow-out pointer-events-none" />
             </div>
           </div>
         )}
 
         {/* Center Split Seam */}
-        <div className="absolute top-1/2 left-0 right-0 h-[1.5px] bg-[#0a0a0f] z-20 shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+        <div className="absolute top-1/2 left-0 right-0 h-[1.5px] bg-[#0a0a0f] z-20 shadow-[0_1px_2px_rgba(0,0,0,0.9)]" />
 
         {/* Side mechanical calendar notches */}
         <div className="absolute -left-[3px] top-1/2 -translate-y-1/2 w-1.5 h-2 rounded-r-full bg-[#0a0a0f] z-30 border-r border-[#2d2d42]" />
