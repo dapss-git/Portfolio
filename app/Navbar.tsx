@@ -47,7 +47,6 @@ export default function Navbar({ activeSection }: NavbarProps) {
           >
             <span className="text-[#4f8ef7]">&lt;</span>
             <span className="text-white">Dafa</span>
-            <span className="text-[#7c5cbf]">Dev</span>
             <span className="text-[#4f8ef7]">/&gt;</span>
           </button>
 
