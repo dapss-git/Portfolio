@@ -19,6 +19,8 @@ import {
   GraduationCapIcon,
   AccountingIcon,
   SparklesIcon,
+  ArrowLeftIcon,
+  DownloadIcon,
 } from "./Icons";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -190,97 +192,163 @@ function FadeSection({
   );
 }
 
+// ─── QRIS Modal ───────────────────────────────────────────────────────────────
+function QrisModal({ onClose }: { onClose: () => void }) {
+  const handleDownload = () => {
+    const a = document.createElement("a");
+    a.href = "/qris.jpeg";
+    a.download = "QRIS-DafaPratama.jpeg";
+    a.click();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[999] flex flex-col items-center justify-center px-4"
+      style={{ background: "rgba(5,5,10,0.95)", backdropFilter: "blur(20px)" }}
+    >
+      {/* Animated border ring */}
+      <div className="relative flex flex-col items-center gap-6 w-full max-w-sm">
+        {/* Header */}
+        <div className="w-full flex items-center justify-between">
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1e1e2e] border border-[#2e2e3e] text-gray-300 hover:text-white hover:border-[#4f8ef7]/40 transition-all active:scale-95 text-sm font-mono font-semibold"
+          >
+            <ArrowLeftIcon className="w-4 h-4" />
+            Back
+          </button>
+          <span className="text-xs text-[#7c5cbf] font-mono tracking-widest uppercase">
+            QRIS · Scan to Pay
+          </span>
+          <div className="w-20" />
+        </div>
+
+        {/* QRIS image card */}
+        <div className="relative w-full rounded-3xl overflow-hidden border border-[#7c5cbf]/40 shadow-[0_0_60px_rgba(124,92,191,0.25)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/qris.jpeg"
+            alt="QRIS Payment Dafa Pratama"
+            className="w-full h-auto object-contain bg-white rounded-3xl"
+          />
+        </div>
+
+        {/* Info */}
+        <p className="text-xs text-gray-500 font-mono text-center">
+          Muhammad Dafa Pratama · Dana / Gopay / OVO / ShopeePay
+        </p>
+
+        {/* Download button */}
+        <button
+          onClick={handleDownload}
+          className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-[#7c5cbf] hover:bg-[#6a4daa] text-white font-bold font-mono text-sm transition-all active:scale-95 shadow-[0_0_30px_rgba(124,92,191,0.4)]"
+        >
+          <DownloadIcon className="w-5 h-5" />
+          Download QRIS
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── PaymentSection ────────────────────────────────────────────────────────────
 function PaymentSection() {
   const [showQris, setShowQris] = useState(false);
 
   return (
-    <section id="payment" className="py-24 px-4 bg-[#0d0d14]">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-xs tracking-[0.3em] text-[#7c5cbf] uppercase font-mono mb-3">
-            05. Support
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Dukung <span className="text-[#7c5cbf]">Aku</span>
-          </h2>
-          <p className="text-gray-400 text-sm">
-            Jika kamu ingin memberikan apresiasi atau donasi, bisa transfer via:
-          </p>
-        </div>
+    <>
+      {/* QRIS Fullscreen Modal */}
+      {showQris && <QrisModal onClose={() => setShowQris(false)} />}
 
-        <div className="grid sm:grid-cols-2 gap-4 mb-6">
-          {[
-            {
-              label: "Gopay & OVO",
-              number: "0895393325895",
-              icon: <WalletIcon className="w-6 h-6 text-[#4f8ef7]" />,
-              color: "#4f8ef7",
-            },
-            {
-              label: "Dana",
-              number: "085120170735",
-              icon: <WalletIcon className="w-6 h-6 text-[#7c5cbf]" />,
-              color: "#7c5cbf",
-            },
-          ].map((p) => (
-            <div
-              key={p.label}
-              className="bg-[#12121a] border border-[#1e1e2e] hover:border-[#7c5cbf]/40 rounded-2xl p-5 transition-all duration-200 hover:-translate-y-1"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 rounded-xl bg-white/5 border border-white/10">
-                  {p.icon}
-                </div>
-                <span className="text-sm font-bold text-white">{p.label}</span>
-              </div>
-              <p
-                className="font-mono text-lg tracking-wider"
-                style={{ color: p.color }}
-              >
-                {p.number}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* QRIS */}
-        <div className="bg-[#12121a] border border-[#1e1e2e] rounded-2xl p-6 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4 text-sm text-gray-400">
-            <QrCodeIcon className="w-5 h-5 text-[#7c5cbf]" />
-            <span>
-              Atau scan <span className="text-[#7c5cbf] font-bold">QRIS</span> di sini:
-            </span>
+      <section id="payment" className="py-24 px-4 bg-[#0d0d14]">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-xs tracking-[0.3em] text-[#7c5cbf] uppercase font-mono mb-3">
+              05. Support
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Dukung <span className="text-[#7c5cbf]">Aku</span>
+            </h2>
+            <p className="text-gray-400 text-sm">
+              Jika kamu ingin memberikan apresiasi atau donasi, bisa transfer via:
+            </p>
           </div>
-          {showQris ? (
-            <div className="flex flex-col items-center gap-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/qris.jpeg"
-                alt="QRIS Payment"
-                className="w-64 h-64 object-contain rounded-xl border border-[#1e1e2e] shadow-[0_0_30px_rgba(124,92,191,0.3)] bg-white p-2"
-              />
-              <button
-                onClick={() => setShowQris(false)}
-                className="text-xs text-gray-500 hover:text-white font-mono underline"
+
+          <div className="grid sm:grid-cols-2 gap-4 mb-6">
+            {[
+              {
+                label: "Gopay & OVO",
+                number: "0895393325895",
+                icon: <WalletIcon className="w-6 h-6 text-[#4f8ef7]" />,
+                color: "#4f8ef7",
+              },
+              {
+                label: "Dana",
+                number: "085120170735",
+                icon: <WalletIcon className="w-6 h-6 text-[#7c5cbf]" />,
+                color: "#7c5cbf",
+              },
+            ].map((p) => (
+              <div
+                key={p.label}
+                className="bg-[#12121a] border border-[#1e1e2e] hover:border-[#7c5cbf]/40 rounded-2xl p-5 transition-all duration-200 hover:-translate-y-1"
               >
-                Tutup QRIS
-              </button>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-xl bg-white/5 border border-white/10">
+                    {p.icon}
+                  </div>
+                  <span className="text-sm font-bold text-white">{p.label}</span>
+                </div>
+                <p
+                  className="font-mono text-lg tracking-wider"
+                  style={{ color: p.color }}
+                >
+                  {p.number}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* QRIS Card — click to open fullscreen modal */}
+          <button
+            onClick={() => setShowQris(true)}
+            className="w-full group bg-[#12121a] border border-[#1e1e2e] hover:border-[#7c5cbf]/60 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(124,92,191,0.15)]"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-[#7c5cbf]/15 border border-[#7c5cbf]/30">
+                  <QrCodeIcon className="w-5 h-5 text-[#7c5cbf]" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-bold text-white">Scan QRIS</p>
+                  <p className="text-xs text-gray-500 font-mono">Klik untuk lihat fullscreen</p>
+                </div>
+              </div>
+              {/* Mini preview thumbnail */}
+              <div className="w-16 h-16 rounded-xl overflow-hidden border border-[#7c5cbf]/30 bg-white flex-shrink-0 group-hover:border-[#7c5cbf]/60 transition-colors">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/qris.jpeg"
+                  alt="QRIS Preview"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
-          ) : (
-            <button
-              onClick={() => setShowQris(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#7c5cbf] text-white font-mono text-sm font-bold glow-purple hover:bg-[#6a4daa] transition-all active:scale-95"
-            >
-              <QrCodeIcon className="w-4 h-4" />
-              Tampilkan QRIS
-            </button>
-          )}
+            <div className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#7c5cbf]/10 border border-[#7c5cbf]/20 group-hover:bg-[#7c5cbf]/20 transition-colors">
+              <QrCodeIcon className="w-4 h-4 text-[#7c5cbf]" />
+              <span className="text-xs font-bold font-mono text-[#7c5cbf]">
+                Tampilkan QRIS Fullscreen
+              </span>
+            </div>
+          </button>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
+
+
+
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function Home() {
