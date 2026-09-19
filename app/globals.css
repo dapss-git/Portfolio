@@ -134,3 +134,36 @@ body {
 .animate-rotate-slow {
   animation: rotate-slow 8s linear infinite;
 }
+
+/* 3D Split-Flap / Calendar Page Flip Animations */
+@keyframes flip-top-flap {
+  0% {
+    transform: rotateX(0deg);
+  }
+  100% {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes flip-bottom-flap {
+  0% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+.animate-flip-top {
+  animation: flip-top-flap 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: bottom;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.animate-flip-bottom {
+  animation: flip-bottom-flap 0.28s 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: top;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}

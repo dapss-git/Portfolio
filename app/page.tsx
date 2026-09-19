@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Navbar from "./Navbar";
 import LoadingScreen from "./LoadingScreen";
 import ContactSection from "./ContactSection";
+import BirthdayCountdown from "./BirthdayCountdown";
 import {
   InstagramIcon,
   TikTokIcon,
@@ -22,6 +23,8 @@ import {
   ArrowLeftIcon,
   DownloadIcon,
   SaweriaIcon,
+  CopyIcon,
+  CheckIcon,
 } from "./Icons";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -255,6 +258,13 @@ function QrisModal({ onClose }: { onClose: () => void }) {
 // ─── PaymentSection ────────────────────────────────────────────────────────────
 function PaymentSection() {
   const [showQris, setShowQris] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const handleCopy = (num: string) => {
+    navigator.clipboard.writeText(num);
+    setCopied(num);
+    setTimeout(() => setCopied(null), 2000);
+  };
 
   return (
     <>
@@ -292,7 +302,7 @@ function PaymentSection() {
             ].map((p) => (
               <div
                 key={p.label}
-                className="bg-[#12121a] border border-[#1e1e2e] hover:border-[#7c5cbf]/40 rounded-2xl p-5 transition-all duration-200 hover:-translate-y-1"
+                className="bg-[#12121a] border border-[#1e1e2e] hover:border-[#7c5cbf]/40 rounded-2xl p-5 transition-all duration-200 hover:-translate-y-1 flex flex-col justify-between"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 rounded-xl bg-white/5 border border-white/10">
@@ -300,12 +310,31 @@ function PaymentSection() {
                   </div>
                   <span className="text-sm font-bold text-white">{p.label}</span>
                 </div>
-                <p
-                  className="font-mono text-lg tracking-wider"
-                  style={{ color: p.color }}
-                >
-                  {p.number}
-                </p>
+                <div className="flex items-center justify-between gap-2 mt-1">
+                  <p
+                    className="font-mono text-base sm:text-lg tracking-wider font-semibold"
+                    style={{ color: p.color }}
+                  >
+                    {p.number}
+                  </p>
+                  <button
+                    onClick={() => handleCopy(p.number)}
+                    title="Salin nomor"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-xs font-mono font-medium transition-all active:scale-95 text-gray-300 hover:text-white"
+                  >
+                    {copied === p.number ? (
+                      <>
+                        <CheckIcon className="w-3.5 h-3.5 text-[#00ff88]" />
+                        <span className="text-[#00ff88]">Tersalin</span>
+                      </>
+                    ) : (
+                      <>
+                        <CopyIcon className="w-3.5 h-3.5 text-gray-400" />
+                        <span>Salin</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -536,6 +565,9 @@ export default function Home() {
                   </p>
                 </div>
               </div>
+
+              {/* Realtime Birthday Countdown Flip Clock */}
+              <BirthdayCountdown />
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-3 w-full max-w-xs">
