@@ -590,12 +590,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          {/* Scroll indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
-            <span className="text-xs font-mono text-gray-500">scroll</span>
-            <div className="w-px h-8 bg-gradient-to-b from-[#4f8ef7] to-transparent" />
-          </div>
         </section>
 
         {/* ── ABOUT SECTION ────────────────────────────────────────── */}
@@ -720,8 +714,8 @@ export default function Home() {
 
               {/* Social links grid */}
               <div className="mt-10">
-                <p className="text-xs text-gray-500 font-mono mb-4 text-center">
-                  // Temukan akun resmi ku di:
+                <p className="text-xs text-[#4f8ef7] font-mono mb-4 text-center tracking-widest uppercase font-semibold">
+                  Media Sosial &amp; Komunitas
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {socialLinks.map((s) => (

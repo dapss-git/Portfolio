@@ -12,14 +12,14 @@ import {
 type SendStatus = "idle" | "verified" | "loading" | "success" | "error";
 
 export default function ContactSection() {
-  const [form, setForm] = useState({ name: "", message: "" });
+  const [form, setForm] = useState({ name: "", contact: "", message: "" });
   const [status, setStatus] = useState<SendStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleVerified = () => setStatus("verified");
 
   const handleSubmit = async () => {
-    if (!form.name.trim() || !form.message.trim()) return;
+    if (!form.name.trim() || !form.contact.trim() || !form.message.trim()) return;
     if (status !== "verified") return;
 
     setStatus("loading");
@@ -31,6 +31,7 @@ export default function ContactSection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name.trim(),
+          contact: form.contact.trim(),
           message: form.message.trim(),
         }),
       });
@@ -42,7 +43,7 @@ export default function ContactSection() {
       }
 
       setStatus("success");
-      setForm({ name: "", message: "" });
+      setForm({ name: "", contact: "", message: "" });
     } catch (err: unknown) {
       setStatus("error");
       const msg =
@@ -144,7 +145,7 @@ export default function ContactSection() {
               <div>
                 <p className="text-[#00ff88] font-bold text-lg">Pesan Terkirim!</p>
                 <p className="text-gray-400 text-sm mt-1">
-                  Aku akan balas secepatnya via WhatsApp / Telegram.
+                  Pesan sudah masuk ke bot Telegram ku. Aku akan hubungi kamu balik via kontak yang kamu cantumkan!
                 </p>
               </div>
               <button
@@ -166,6 +167,21 @@ export default function ContactSection() {
                   placeholder='"Nama kamu..."'
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  disabled={status === "loading"}
+                  className="w-full bg-[#0a0a0f] border border-[#1e1e2e] focus:border-[#4f8ef7]/60 rounded-xl px-4 py-3 text-sm font-mono text-white placeholder-gray-600 outline-none transition-colors disabled:opacity-50"
+                />
+              </div>
+
+              {/* Contact */}
+              <div>
+                <label className="text-xs text-[#4f8ef7] font-mono mb-1.5 block">
+                  const contact =
+                </label>
+                <input
+                  type="text"
+                  placeholder='"No. WhatsApp / Username Telegram kamu..."'
+                  value={form.contact}
+                  onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))}
                   disabled={status === "loading"}
                   className="w-full bg-[#0a0a0f] border border-[#1e1e2e] focus:border-[#4f8ef7]/60 rounded-xl px-4 py-3 text-sm font-mono text-white placeholder-gray-600 outline-none transition-colors disabled:opacity-50"
                 />
@@ -208,11 +224,11 @@ export default function ContactSection() {
               {/* Submit button */}
               <button
                 onClick={handleSubmit}
-                disabled={status !== "verified" || !form.name.trim() || !form.message.trim()}
+                disabled={status !== "verified" || !form.name.trim() || !form.contact.trim() || !form.message.trim()}
                 className={`w-full py-4 rounded-xl font-bold font-mono text-sm transition-all duration-300 relative overflow-hidden ${
                   status === "loading"
                     ? "bg-[#4f8ef7]/50 text-white cursor-wait"
-                    : status === "verified" && form.name.trim() && form.message.trim()
+                    : status === "verified" && form.name.trim() && form.contact.trim() && form.message.trim()
                     ? "bg-[#4f8ef7] text-white glow-blue hover:bg-[#3a7de8] active:scale-95"
                     : "bg-[#1e1e2e] text-gray-600 cursor-not-allowed"
                 }`}

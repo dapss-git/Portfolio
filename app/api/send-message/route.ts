@@ -17,22 +17,24 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const name = typeof body.name === "string" ? body.name.trim() : "";
+    const contact = typeof body.contact === "string" ? body.contact.trim() : "";
     const message = typeof body.message === "string" ? body.message.trim() : "";
     const rawText = typeof body.text === "string" ? body.text.trim() : "";
 
     let sendText = "";
-    if (name || message) {
+    if (name || message || contact) {
       const safeName = escapeHtml(name || "Anonim");
+      const safeContact = escapeHtml(contact || "-");
       const safeMessage = escapeHtml(message || rawText || "-");
       const timeStr = new Date().toLocaleString("id-ID", {
         timeZone: "Asia/Jakarta",
       });
-      sendText = `📩 <b>Pesan Portfolio Baru!</b>\n\n👤 <b>Nama:</b> ${safeName}\n💬 <b>Pesan:</b>\n${safeMessage}\n\n📅 <b>Waktu:</b> ${timeStr} WIB`;
+      sendText = `📩 <b>Pesan Portfolio Baru!</b>\n\n👤 <b>Nama:</b> ${safeName}\n📱 <b>Kontak:</b> ${safeContact}\n💬 <b>Pesan:</b>\n${safeMessage}\n\n📅 <b>Waktu:</b> ${timeStr} WIB`;
     } else if (rawText) {
       sendText = escapeHtml(rawText);
     } else {
       return NextResponse.json(
-        { error: "Nama dan pesan tidak boleh kosong" },
+        { error: "Nama, kontak, dan pesan tidak boleh kosong" },
         { status: 400 }
       );
     }
