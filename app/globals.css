@@ -36,8 +36,8 @@
   --text-muted: #a1a1aa;
   --border-color: #000000;
   --shadow-color: #000000;
-  --accent-primary: #FFE600;
-  --accent-secondary: #00F0FF;
+  --accent-primary: #00F0FF;
+  --accent-secondary: #FFE600;
   --accent-tertiary: #FF5C8D;
   --accent-green: #22C55E;
 }

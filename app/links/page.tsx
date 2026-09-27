@@ -203,7 +203,10 @@ interface LinkCategory {
       <main className="min-h-screen py-8 px-4 flex flex-col items-center">
         {/* Toast */}
         {toast && (
-          <div className="fixed top-5 z-50 px-4 py-2 bg-[#FFE600] text-black border-2 border-black rounded-xl font-mono text-xs font-black shadow-[4px_4px_0px_#000] animate-fade-up">
+          <div
+            style={{ backgroundColor: "var(--accent-primary)" }}
+            className="fixed top-5 z-50 px-4 py-2 text-black border-2 border-black rounded-xl font-mono text-xs font-black shadow-[4px_4px_0px_#000] animate-fade-up"
+          >
             {toast}
           </div>
         )}

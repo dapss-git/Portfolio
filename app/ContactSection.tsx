@@ -62,7 +62,13 @@ export default function ContactSection() {
             04. Contact
           </div>
           <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[var(--text-main)] mb-3">
-            Hubungi <span className="bg-[#00f0ff] px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]">Aku</span>
+            Hubungi{" "}
+            <span
+              style={{ backgroundColor: "var(--accent-primary)" }}
+              className="px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]"
+            >
+              Aku
+            </span>
           </h2>
           <p className="text-sm font-mono opacity-80 text-[var(--text-main)]">
             Ada pertanyaan atau ingin kolaborasi? Kirim pesan langsung ke bot Telegram ku!
@@ -235,6 +241,14 @@ export default function ContactSection() {
                   !form.contact.trim() ||
                   !form.message.trim()
                 }
+                style={
+                  status === "verified" &&
+                  form.name.trim() &&
+                  form.contact.trim() &&
+                  form.message.trim()
+                    ? { backgroundColor: "var(--accent-primary)" }
+                    : undefined
+                }
                 className={`w-full py-4 font-black font-mono uppercase tracking-wider text-sm border-2 border-black transition-all ${
                   status === "loading"
                     ? "bg-[#FFE135] text-black opacity-80 cursor-wait shadow-[2px_2px_0px_#000]"
@@ -242,7 +256,7 @@ export default function ContactSection() {
                       form.name.trim() &&
                       form.contact.trim() &&
                       form.message.trim()
-                    ? "bg-[#00f0ff] text-black shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                    ? "text-black shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
                     : "bg-gray-300 dark:bg-gray-800 text-gray-500 cursor-not-allowed shadow-[2px_2px_0px_#000]"
                 }`}
               >

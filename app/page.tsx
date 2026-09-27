@@ -257,7 +257,13 @@ function PaymentSection() {
               05. Support &amp; Donasi
             </div>
             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[var(--text-main)] mb-3">
-              Dukung <span className="bg-[#FFE135] px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]">Aku</span>
+              Dukung{" "}
+              <span
+                style={{ backgroundColor: "var(--accent-primary)" }}
+                className="px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]"
+              >
+                Aku
+              </span>
             </h2>
             <p className="text-sm font-mono opacity-80 text-[var(--text-main)]">
               Dukungan atau donasi dapat disalurkan melalui nomor e-wallet atau scan QRIS di bawah:
@@ -433,12 +439,6 @@ export default function Home() {
           <div className="max-w-6xl mx-auto w-full grid md:grid-cols-2 gap-10 items-center">
             {/* Left */}
             <div>
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#00ff66] text-black border-2 border-black shadow-[2px_2px_0px_#000] font-mono text-xs font-black uppercase mb-5">
-                <span className="w-2.5 h-2.5 bg-black inline-block animate-ping" />
-                <span>ONLINE · AVAILABLE FOR COLLAB</span>
-              </div>
-
               {/* Name */}
               <div className="mb-4">
                 <p className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-main)] opacity-70 mb-2">
@@ -446,7 +446,10 @@ export default function Home() {
                 </p>
                 <h1 className="text-3xl sm:text-5xl font-black text-[var(--text-main)] leading-tight uppercase">
                   {typedText}
-                  <span className="bg-[#FFE135] text-black px-1 ml-1 border-2 border-black inline-block animate-pulse">
+                  <span
+                    style={{ backgroundColor: "var(--accent-primary)" }}
+                    className="text-black px-1 ml-1 border-2 border-black inline-block animate-pulse"
+                  >
                     _
                   </span>
                 </h1>
@@ -471,7 +474,8 @@ export default function Home() {
                       .getElementById("contact")
                       ?.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="px-5 py-3 bg-[#00f0ff] text-black font-black font-mono text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
+                  style={{ backgroundColor: "var(--accent-primary)" }}
+                  className="px-5 py-3 text-black font-black font-mono text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
                 >
                   <span>Kirim Pesan</span>
                   <span>→</span>
@@ -509,13 +513,6 @@ export default function Home() {
                       (e.target as HTMLElement).style.display = "none";
                     }}
                   />
-
-                  {/* Corner badge */}
-                  <div className="absolute top-2 left-2 px-2 py-0.5 bg-[#FFE135] border-2 border-black shadow-[2px_2px_0px_#000]">
-                    <span className="text-[10px] font-mono text-black font-black uppercase">
-                      PORTFOLIO
-                    </span>
-                  </div>
                 </div>
 
                 {/* Floating badge */}
@@ -559,7 +556,13 @@ export default function Home() {
                   02. About
                 </div>
                 <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[var(--text-main)]">
-                  Tentang <span className="bg-[#FFE135] px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]">Aku</span>
+                  Tentang{" "}
+                  <span
+                    style={{ backgroundColor: "var(--accent-primary)" }}
+                    className="px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]"
+                  >
+                    Aku
+                  </span>
                 </h2>
               </div>
 
@@ -695,7 +698,13 @@ export default function Home() {
                   03. Skills
                 </div>
                 <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[var(--text-main)]">
-                  Keahlian <span className="bg-[#00ff66] px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]">Ku</span>
+                  Keahlian{" "}
+                  <span
+                    style={{ backgroundColor: "var(--accent-primary)" }}
+                    className="px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]"
+                  >
+                    Ku
+                  </span>
                 </h2>
               </div>
 
@@ -758,7 +767,14 @@ export default function Home() {
         {/* ── FOOTER ───────────────────────────────────────────────── */}
         <footer className="py-8 px-4 border-t-2 sm:border-t-3 border-black bg-[var(--card-bg)] text-center">
           <p className="text-xs font-mono font-bold text-[var(--text-main)]">
-            Dibuat oleh <span className="bg-[#FFE135] text-black px-1.5 py-0.5 border border-black">Muhammad Dafa Pratama</span> · {new Date().getFullYear()}
+            Dibuat oleh{" "}
+            <span
+              style={{ backgroundColor: "var(--accent-primary)" }}
+              className="text-black px-1.5 py-0.5 border border-black font-black"
+            >
+              Muhammad Dafa Pratama
+            </span>{" "}
+            · {new Date().getFullYear()}
           </p>
           <div className="flex items-center justify-center gap-2 mt-2">
             <Link

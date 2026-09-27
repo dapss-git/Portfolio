@@ -46,7 +46,8 @@ export default function Navbar({ activeSection }: NavbarProps) {
           {/* Logo */}
           <button
             onClick={() => handleNav("#home")}
-            className="font-mono text-sm sm:text-base font-black tracking-wider px-3 py-1.5 bg-[#FFE135] text-black border-2 border-black shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+            style={{ backgroundColor: "var(--accent-primary)" }}
+            className="font-mono text-sm sm:text-base font-black tracking-wider px-3 py-1.5 text-black border-2 border-black shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
           >
             <span>&lt;Dafa/&gt;</span>
           </button>
@@ -59,9 +60,10 @@ export default function Navbar({ activeSection }: NavbarProps) {
                 <button
                   key={link.href}
                   onClick={() => handleNav(link.href)}
+                  style={isActive ? { backgroundColor: "var(--accent-primary)" } : undefined}
                   className={`px-3 py-1.5 rounded-none text-xs font-bold font-mono uppercase tracking-wide border-2 transition-all ${
                     isActive
-                      ? "bg-[#00f0ff] text-black border-black shadow-[2px_2px_0px_#000] -translate-y-0.5"
+                      ? "text-black border-black shadow-[2px_2px_0px_#000] -translate-y-0.5"
                       : "bg-transparent text-[var(--text-main)] border-transparent hover:border-black hover:bg-black/5 dark:hover:bg-white/10"
                   }`}
                 >
@@ -138,9 +140,10 @@ export default function Navbar({ activeSection }: NavbarProps) {
               <button
                 key={link.href}
                 onClick={() => handleNav(link.href)}
+                style={isActive ? { backgroundColor: "var(--accent-primary)" } : undefined}
                 className={`w-full max-w-xs py-3 text-lg font-black font-mono uppercase tracking-wider border-2 border-black transition-all ${
                   isActive
-                    ? "bg-[#00f0ff] text-black shadow-[4px_4px_0px_#000]"
+                    ? "text-black shadow-[4px_4px_0px_#000]"
                     : "bg-[var(--card-bg)] text-[var(--text-main)] shadow-[3px_3px_0px_#000]"
                 }`}
               >
