@@ -41,7 +41,7 @@ interface Skill {
 const skills: Skill[] = [
   {
     name: "Microsoft Excel",
-    level: 90,
+    level: 73,
     icon: <ExcelIcon className="w-6 h-6 text-black" />,
     color: "#00ff66",
   },
@@ -586,7 +586,7 @@ export default function Home() {
                     </p>
                     <p>
                       <span className="text-[#ff0055] font-black">&quot;sekolah&quot;</span>:{" "}
-                      <span className="font-bold">&quot;SMK Negeri&quot;</span>,
+                      <span className="font-bold">&quot;SMK Swasta&quot;</span>,
                     </p>
                     <p>
                       <span className="text-[#ff0055] font-black">&quot;kelas&quot;</span>:{" "}
@@ -615,8 +615,8 @@ export default function Home() {
                   {[
                     {
                       icon: <GraduationCapIcon className="w-5 h-5 text-black" />,
-                      title: "Pelajar SMK",
-                      desc: "Menempuh pendidikan di SMK Kelas XI jurusan Akuntansi Keuangan dan Lembaga (AKL).",
+                      title: "Pelajar SMK Swasta",
+                      desc: "Menempuh pendidikan di SMK Swasta Kelas XI jurusan Akuntansi Keuangan dan Lembaga (AKL).",
                       bg: "#00f0ff",
                     },
                     {
