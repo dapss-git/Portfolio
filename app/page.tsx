@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Navbar from "./Navbar";
 import LoadingScreen from "./LoadingScreen";
 import ContactSection from "./ContactSection";
@@ -25,6 +26,7 @@ import {
   SaweriaIcon,
   CopyIcon,
   CheckIcon,
+  LinkIcon,
 } from "./Icons";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -40,76 +42,76 @@ const skills: Skill[] = [
   {
     name: "Microsoft Excel",
     level: 90,
-    icon: <ExcelIcon className="w-6 h-6 text-[#00ff88]" />,
-    color: "#00ff88",
+    icon: <ExcelIcon className="w-6 h-6 text-black" />,
+    color: "#00ff66",
   },
   {
     name: "Microsoft Word",
     level: 88,
-    icon: <WordIcon className="w-6 h-6 text-[#4f8ef7]" />,
-    color: "#4f8ef7",
+    icon: <WordIcon className="w-6 h-6 text-black" />,
+    color: "#00f0ff",
   },
   {
     name: "Social Media Mgmt",
     level: 85,
-    icon: <ShareNodesIcon className="w-6 h-6 text-[#e1306c]" />,
-    color: "#e1306c",
+    icon: <ShareNodesIcon className="w-6 h-6 text-black" />,
+    color: "#ff70a6",
   },
 ];
 
 const stats = [
-  { label: "Status", value: "ONLINE", color: "#00ff88" },
-  { label: "Kelas", value: "XI AKL", color: "#4f8ef7" },
-  { label: "Sekolah", value: "SMK", color: "#7c5cbf" },
+  { label: "Status", value: "ONLINE", bg: "#00ff66" },
+  { label: "Kelas", value: "XI AKL", bg: "#FFE135" },
+  { label: "Sekolah", value: "SMK", bg: "#00f0ff" },
 ];
 
 const socialLinks = [
   {
-    icon: <InstagramIcon className="w-5 h-5 text-[#e1306c]" />,
+    icon: <InstagramIcon className="w-5 h-5 text-black" />,
     label: "Instagram",
     href: "https://instagram.com/dafaaaaa11111",
     username: "@dafaaaaa11111",
-    color: "#e1306c",
+    bg: "#ff70a6",
   },
   {
-    icon: <TikTokIcon className="w-5 h-5 text-white" />,
+    icon: <TikTokIcon className="w-5 h-5 text-black" />,
     label: "TikTok",
     href: "https://tiktok.com/@dafaaaaa11111",
     username: "@dafaaaaa11111",
-    color: "#00f2fe",
+    bg: "#00f0ff",
   },
   {
-    icon: <FacebookIcon className="w-5 h-5 text-[#1877f2]" />,
+    icon: <FacebookIcon className="w-5 h-5 text-black" />,
     label: "Facebook",
     href: "https://facebook.com/dafaaaaa11111",
     username: "dafaaaaa11111",
-    color: "#1877f2",
+    bg: "#8338ec",
   },
   {
-    icon: <TelegramIcon className="w-5 h-5 text-[#229ed9]" />,
+    icon: <TelegramIcon className="w-5 h-5 text-black" />,
     label: "Telegram",
     href: "https://t.me/dafaaaaa11111",
     username: "@dafaaaaa11111",
-    color: "#229ed9",
+    bg: "#00f0ff",
   },
   {
-    icon: <WhatsAppIcon className="w-5 h-5 text-[#25d366]" />,
+    icon: <WhatsAppIcon className="w-5 h-5 text-black" />,
     label: "WhatsApp",
     href: "https://wa.me/62895393325895",
     username: "+62 895-393-325-895",
-    color: "#25d366",
+    bg: "#00ff66",
   },
   {
-    icon: <BroadcastIcon className="w-5 h-5 text-[#00d4ff]" />,
+    icon: <BroadcastIcon className="w-5 h-5 text-black" />,
     label: "WA Channel",
     href: "https://whatsapp.com/channel/0029Vb89x3U5fM5VSAMCHQ16",
     username: "Channel Dafa",
-    color: "#00d4ff",
+    bg: "#FFE135",
   },
 ];
 
 // ─── SkillBar ─────────────────────────────────────────────────────────────────
-function SkillBar({ skill, delay }: { skill: Skill; delay: number }) {
+function SkillBar({ skill }: { skill: Skill }) {
   const [animated, setAnimated] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -125,41 +127,40 @@ function SkillBar({ skill, delay }: { skill: Skill; delay: number }) {
   }, []);
 
   return (
-    <div ref={ref} className="group" style={{ animationDelay: `${delay}ms` }}>
-      <div className="bg-[#12121a] border border-[#1e1e2e] hover:border-[#4f8ef7]/40 rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-white/5 border border-white/10">
-              {skill.icon}
-            </div>
-            <span className="text-sm font-medium text-white font-mono">
-              {skill.name}
-            </span>
-          </div>
-          <span
-            className="text-xs font-mono font-bold"
-            style={{ color: skill.color }}
+    <div
+      ref={ref}
+      className="bg-[var(--card-bg)] border-2 sm:border-3 border-black p-4 sm:p-5 shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#000] transition-all"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]"
+            style={{ background: skill.color }}
           >
-            {skill.level}%
+            {skill.icon}
+          </div>
+          <span className="font-mono font-black text-sm sm:text-base text-[var(--text-main)]">
+            {skill.name}
           </span>
         </div>
-        <div className="h-1.5 bg-[#0a0a0f] rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-1000 ease-out"
-            style={{
-              width: animated ? `${skill.level}%` : "0%",
-              background: `linear-gradient(90deg, ${skill.color}, ${skill.color}88)`,
-              transitionDelay: `${delay}ms`,
-              boxShadow: `0 0 10px ${skill.color}60`,
-            }}
-          />
-        </div>
+        <span className="font-mono font-black text-xs px-2.5 py-1 bg-black text-white border border-black">
+          {skill.level}%
+        </span>
+      </div>
+      <div className="h-4 bg-[var(--bg-main)] border-2 border-black overflow-hidden p-0.5">
+        <div
+          className="h-full border border-black transition-all duration-1000 ease-out"
+          style={{
+            width: animated ? `${skill.level}%` : "0%",
+            background: skill.color,
+          }}
+        />
       </div>
     </div>
   );
 }
 
-// ─── Section wrapper with fade-in ─────────────────────────────────────────────
+// ─── Section wrapper ──────────────────────────────────────────────────────────
 function FadeSection({
   children,
   id,
@@ -167,30 +168,8 @@ function FadeSection({
   children: React.ReactNode;
   id: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) setVisible(true);
-      },
-      { threshold: 0.1 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <div
-      ref={ref}
-      id={id}
-      className="transition-all duration-700"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(30px)",
-      }}
-    >
+    <div id={id} className="w-full">
       {children}
     </div>
   );
@@ -207,48 +186,49 @@ function QrisModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-[999] flex flex-col items-center justify-center px-4"
-      style={{ background: "rgba(5,5,10,0.95)", backdropFilter: "blur(20px)" }}
+      className="fixed inset-0 z-[999] flex flex-col items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      onClick={onClose}
     >
-      {/* Animated border ring */}
-      <div className="relative flex flex-col items-center gap-6 w-full max-w-sm">
+      <div
+        className="relative flex flex-col items-center gap-5 w-full max-w-sm bg-[var(--card-bg)] border-3 border-black p-5 sm:p-6 shadow-[8px_8px_0px_#000]"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="w-full flex items-center justify-between">
+        <div className="w-full flex items-center justify-between border-b-2 border-black pb-3">
           <button
             onClick={onClose}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1e1e2e] border border-[#2e2e3e] text-gray-300 hover:text-white hover:border-[#4f8ef7]/40 transition-all active:scale-95 text-sm font-mono font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#ff5555] text-white border-2 border-black font-mono font-bold text-xs shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
           >
-            <ArrowLeftIcon className="w-4 h-4" />
-            Back
+            <ArrowLeftIcon className="w-3.5 h-3.5" />
+            Tutup
           </button>
-          <span className="text-xs text-[#7c5cbf] font-mono tracking-widest uppercase">
-            QRIS · Scan to Pay
+          <span className="font-mono text-xs font-black uppercase tracking-wider text-[var(--text-main)]">
+            QRIS PAYMENT
           </span>
-          <div className="w-20" />
         </div>
 
         {/* QRIS image card */}
-        <div className="relative w-full rounded-3xl overflow-hidden border border-[#7c5cbf]/40 shadow-[0_0_60px_rgba(124,92,191,0.25)]">
+        <div className="border-3 border-black shadow-[4px_4px_0px_#000] overflow-hidden bg-white w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/qris.jpeg"
             alt="QRIS Payment Dafa Pratama"
-            className="w-full h-auto object-contain bg-white rounded-3xl"
+            className="w-full h-auto object-contain"
           />
         </div>
 
         {/* Info */}
-        <p className="text-xs text-gray-500 font-mono text-center">
-          Muhammad Dafa Pratama · Dana / Gopay / OVO / ShopeePay
+        <p className="text-xs font-mono font-bold text-center text-[var(--text-main)]">
+          Muhammad Dafa Pratama · Dana / Gopay / OVO / ShopeePay / Bank
         </p>
 
         {/* Download button */}
         <button
           onClick={handleDownload}
-          className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-[#7c5cbf] hover:bg-[#6a4daa] text-white font-bold font-mono text-sm transition-all active:scale-95 shadow-[0_0_30px_rgba(124,92,191,0.4)]"
+          className="w-full flex items-center justify-center gap-2 py-3 bg-[#00ff66] text-black border-2 border-black font-mono font-black text-sm uppercase shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
         >
-          <DownloadIcon className="w-5 h-5" />
-          Download QRIS
+          <DownloadIcon className="w-4 h-4" />
+          <span>Download Gambar QRIS</span>
         </button>
       </div>
     </div>
@@ -268,68 +248,69 @@ function PaymentSection() {
 
   return (
     <>
-      {/* QRIS Fullscreen Modal */}
       {showQris && <QrisModal onClose={() => setShowQris(false)} />}
 
-      <section id="payment" className="py-24 px-4 bg-[#0d0d14]">
+      <section id="payment" className="py-20 px-4">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-xs tracking-[0.3em] text-[#7c5cbf] uppercase font-mono mb-3">
-              05. Support
-            </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Dukung <span className="text-[#7c5cbf]">Aku</span>
+          <div className="text-center mb-10">
+            <div className="inline-block px-3 py-1 bg-[#8338ec] text-white border-2 border-black shadow-[2px_2px_0px_#000] font-mono text-xs font-black uppercase mb-3">
+              05. Support &amp; Donasi
+            </div>
+            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[var(--text-main)] mb-3">
+              Dukung <span className="bg-[#FFE135] px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]">Aku</span>
             </h2>
-            <p className="text-gray-400 text-sm">
-              Jika kamu ingin memberikan apresiasi atau donasi, bisa transfer via:
+            <p className="text-sm font-mono opacity-80 text-[var(--text-main)]">
+              Dukungan atau donasi dapat disalurkan melalui nomor e-wallet atau scan QRIS di bawah:
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4 mb-6">
+          <div className="grid sm:grid-cols-2 gap-4 mb-4">
             {[
               {
                 label: "Gopay & OVO",
                 number: "0895393325895",
-                icon: <WalletIcon className="w-6 h-6 text-[#4f8ef7]" />,
-                color: "#4f8ef7",
+                icon: <WalletIcon className="w-5 h-5 text-black" />,
+                bg: "#00f0ff",
               },
               {
                 label: "Dana",
                 number: "085120170735",
-                icon: <WalletIcon className="w-6 h-6 text-[#7c5cbf]" />,
-                color: "#7c5cbf",
+                icon: <WalletIcon className="w-5 h-5 text-black" />,
+                bg: "#FFE135",
               },
             ].map((p) => (
               <div
                 key={p.label}
-                className="bg-[#12121a] border border-[#1e1e2e] hover:border-[#7c5cbf]/40 rounded-2xl p-5 transition-all duration-200 hover:-translate-y-1 flex flex-col justify-between"
+                className="bg-[var(--card-bg)] border-2 sm:border-3 border-black p-4 sm:p-5 shadow-[4px_4px_0px_#000] flex flex-col justify-between"
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 rounded-xl bg-white/5 border border-white/10">
+                  <div
+                    className="w-9 h-9 border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]"
+                    style={{ background: p.bg }}
+                  >
                     {p.icon}
                   </div>
-                  <span className="text-sm font-bold text-white">{p.label}</span>
+                  <span className="font-mono font-black text-sm uppercase text-[var(--text-main)]">
+                    {p.label}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between gap-2 mt-1">
-                  <p
-                    className="font-mono text-base sm:text-lg tracking-wider font-semibold"
-                    style={{ color: p.color }}
-                  >
+                <div className="flex items-center justify-between gap-2 pt-2 border-t-2 border-black">
+                  <span className="font-mono text-base font-black text-[var(--text-main)]">
                     {p.number}
-                  </p>
+                  </span>
                   <button
                     onClick={() => handleCopy(p.number)}
                     title="Salin nomor"
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 text-xs font-mono font-medium transition-all active:scale-95 text-gray-300 hover:text-white"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff66] text-black border-2 border-black text-xs font-mono font-black uppercase shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                   >
                     {copied === p.number ? (
                       <>
-                        <CheckIcon className="w-3.5 h-3.5 text-[#00ff88]" />
-                        <span className="text-[#00ff88]">Tersalin</span>
+                        <CheckIcon className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>Disalin</span>
                       </>
                     ) : (
                       <>
-                        <CopyIcon className="w-3.5 h-3.5 text-gray-400" />
+                        <CopyIcon className="w-3.5 h-3.5 stroke-[2.5]" />
                         <span>Salin</span>
                       </>
                     )}
@@ -344,47 +325,42 @@ function PaymentSection() {
             href="https://saweria.co/dafaaaaa1111"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center gap-4 bg-[#12121a] border border-[#1e1e2e] hover:border-[#faae2b]/60 rounded-2xl p-5 mb-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(250,174,43,0.15)] group"
+            className="w-full flex items-center gap-4 bg-[#FFE135] text-black border-2 sm:border-3 border-black p-4 sm:p-5 mb-4 shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
           >
-            <div className="flex-shrink-0 p-2 rounded-xl bg-[#faae2b]/10 border border-[#faae2b]/30 group-hover:bg-[#faae2b]/20 transition-colors">
-              <SaweriaIcon className="w-8 h-8" />
+            <div className="w-12 h-12 bg-white border-2 border-black flex items-center justify-center flex-shrink-0 shadow-[2px_2px_0px_#000]">
+              <SaweriaIcon className="w-7 h-7" />
             </div>
             <div className="flex-1 text-left">
-              <p className="text-sm font-bold text-white">Saweria</p>
-              <p className="text-xs text-[#faae2b] font-mono">saweria.co/dafaaaaa1111</p>
-              <p className="text-xs text-gray-500 mt-0.5">Donasi via Saweria</p>
+              <p className="font-mono font-black text-sm uppercase">Saweria Tip &amp; Donasi</p>
+              <p className="text-xs font-mono font-bold opacity-80">saweria.co/dafaaaaa1111</p>
             </div>
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-4 h-4 text-gray-600 group-hover:text-[#faae2b] transition-colors flex-shrink-0"
-            >
-              <path d="M7 7h10v10" />
-              <path d="M7 17 17 7" />
-            </svg>
+            <span className="px-3 py-1.5 bg-black text-white border-2 border-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000]">
+              Buka →
+            </span>
           </a>
 
-          {/* QRIS Card — click to open fullscreen modal */}
+          {/* QRIS Card */}
           <button
             onClick={() => setShowQris(true)}
-            className="w-full group bg-[#12121a] border border-[#1e1e2e] hover:border-[#7c5cbf]/60 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(124,92,191,0.15)]"
+            className="w-full bg-[var(--card-bg)] border-2 sm:border-3 border-black p-5 shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all text-left"
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-[#7c5cbf]/15 border border-[#7c5cbf]/30">
-                  <QrCodeIcon className="w-5 h-5 text-[#7c5cbf]" />
+                <div className="w-12 h-12 bg-[#00ff66] border-2 border-black flex items-center justify-center flex-shrink-0 shadow-[2px_2px_0px_#000]">
+                  <QrCodeIcon className="w-6 h-6 text-black" />
                 </div>
-                <div className="text-left">
-                  <p className="text-sm font-bold text-white">Scan QRIS</p>
-                  <p className="text-xs text-gray-500 font-mono">Klik untuk lihat fullscreen</p>
+                <div>
+                  <p className="font-mono font-black text-sm uppercase text-[var(--text-main)]">
+                    Scan Pembayaran QRIS
+                  </p>
+                  <p className="text-xs font-mono opacity-70 text-[var(--text-main)]">
+                    Klik untuk membuka QRIS fullscreen
+                  </p>
                 </div>
               </div>
-              {/* Mini preview thumbnail */}
-              <div className="w-16 h-16 rounded-xl overflow-hidden border border-[#7c5cbf]/30 bg-white flex-shrink-0 group-hover:border-[#7c5cbf]/60 transition-colors">
+
+              {/* QRIS thumbnail */}
+              <div className="w-14 h-14 bg-white border-2 border-black overflow-hidden flex-shrink-0 shadow-[2px_2px_0px_#000]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/qris.jpeg"
@@ -393,11 +369,10 @@ function PaymentSection() {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#7c5cbf]/10 border border-[#7c5cbf]/20 group-hover:bg-[#7c5cbf]/20 transition-colors">
-              <QrCodeIcon className="w-4 h-4 text-[#7c5cbf]" />
-              <span className="text-xs font-bold font-mono text-[#7c5cbf]">
-                Tampilkan QRIS Fullscreen
-              </span>
+
+            <div className="mt-4 pt-3 border-t-2 border-black flex items-center justify-center gap-2 bg-[#00f0ff] py-2 border-2 border-black text-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000]">
+              <QrCodeIcon className="w-4 h-4" />
+              <span>Lihat QRIS Fullscreen</span>
             </div>
           </button>
         </div>
@@ -405,9 +380,6 @@ function PaymentSection() {
     </>
   );
 }
-
-
-
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function Home() {
@@ -439,7 +411,7 @@ export default function Home() {
         ([entry]) => {
           if (entry.isIntersecting) setActiveSection(id);
         },
-        { threshold: 0.4 }
+        { threshold: 0.3 }
       );
       obs.observe(el);
       return obs;
@@ -452,59 +424,42 @@ export default function Home() {
       <LoadingScreen />
       <Navbar activeSection={activeSection} />
 
-      <main className="relative">
-        {/* Animated grid background */}
-        <div
-          className="fixed inset-0 opacity-[0.03] pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(79,142,247,1) 1px, transparent 1px), linear-gradient(90deg, rgba(79,142,247,1) 1px, transparent 1px)",
-            backgroundSize: "50px 50px",
-          }}
-        />
-
+      <main className="relative pt-16">
         {/* ── HERO SECTION ─────────────────────────────────────────── */}
         <section
           id="home"
-          className="min-h-screen flex flex-col justify-center px-4 pt-20 relative overflow-hidden"
+          className="min-h-[calc(100vh-4rem)] flex flex-col justify-center px-4 py-12 relative"
         >
-          {/* Decorative blobs */}
-          <div className="absolute top-1/4 -left-32 w-64 h-64 rounded-full bg-[#4f8ef7]/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-1/4 -right-32 w-64 h-64 rounded-full bg-[#7c5cbf]/10 blur-3xl pointer-events-none" />
-
-          <div className="max-w-6xl mx-auto w-full grid md:grid-cols-2 gap-12 items-center">
+          <div className="max-w-6xl mx-auto w-full grid md:grid-cols-2 gap-10 items-center">
             {/* Left */}
-            <div className="animate-slide-left">
+            <div>
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#00ff88]/10 border border-[#00ff88]/20 mb-6">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-pulse-glow" />
-                <span className="text-xs font-mono text-[#00ff88]">
-                  AVAILABLE FOR COLLAB
-                </span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#00ff66] text-black border-2 border-black shadow-[2px_2px_0px_#000] font-mono text-xs font-black uppercase mb-5">
+                <span className="w-2.5 h-2.5 bg-black inline-block animate-ping" />
+                <span>ONLINE · AVAILABLE FOR COLLAB</span>
               </div>
 
               {/* Name */}
               <div className="mb-4">
-                <p className="text-xs tracking-[0.4em] text-[#4f8ef7] uppercase font-mono mb-2">
-                  &gt; Hello, I&apos;m
+                <p className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-main)] opacity-70 mb-2">
+                  &gt; Halo, Saya
                 </p>
-                <h1 className="text-4xl md:text-5xl font-black text-white leading-tight">
+                <h1 className="text-3xl sm:text-5xl font-black text-[var(--text-main)] leading-tight uppercase">
                   {typedText}
-                  <span className="text-[#4f8ef7] animate-blink ml-0.5">|</span>
+                  <span className="bg-[#FFE135] text-black px-1 ml-1 border-2 border-black inline-block animate-pulse">
+                    _
+                  </span>
                 </h1>
               </div>
 
               {/* Tag line */}
-              <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-                Siswa{" "}
-                <span className="text-[#4f8ef7] font-semibold">SMK Kelas XI</span>{" "}
-                jurusan{" "}
-                <span className="text-[#7c5cbf] font-semibold">AKL</span> yang
-                antusias di bidang{" "}
-                <span className="text-white">administrasi</span>,{" "}
-                <span className="text-white">media sosial</span>, dan{" "}
-                <span className="text-white">teknologi digital</span>.
-              </p>
+              <div className="bg-[var(--card-bg)] border-2 sm:border-3 border-black p-4 shadow-[4px_4px_0px_#000] mb-6">
+                <p className="text-sm sm:text-base font-mono text-[var(--text-main)] leading-relaxed">
+                  Siswa <span className="bg-[#FFE135] text-black px-1 font-black">SMK Kelas XI</span> jurusan{" "}
+                  <span className="bg-[#00f0ff] text-black px-1 font-black">AKL</span> yang
+                  fokus pada bidang administrasi, pengelolaan media sosial, dan teknologi digital.
+                </p>
+              </div>
 
               {/* CTA buttons */}
               <div className="flex flex-wrap gap-3">
@@ -516,7 +471,7 @@ export default function Home() {
                       .getElementById("contact")
                       ?.scrollIntoView({ behavior: "smooth" });
                   }}
-                  className="px-6 py-3 rounded-xl bg-[#4f8ef7] text-white font-bold font-mono text-sm glow-blue hover:bg-[#3a7de8] transition-all active:scale-95 flex items-center gap-2"
+                  className="px-5 py-3 bg-[#00f0ff] text-black font-black font-mono text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
                 >
                   <span>Kirim Pesan</span>
                   <span>→</span>
@@ -525,64 +480,67 @@ export default function Home() {
                   href="https://wa.me/62895393325895"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 rounded-xl bg-transparent border border-[#25d366]/40 text-[#25d366] font-bold font-mono text-sm hover:bg-[#25d366]/10 transition-all active:scale-95 flex items-center gap-2"
+                  className="px-5 py-3 bg-[#00ff66] text-black font-black font-mono text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
                 >
-                  <WhatsAppIcon className="w-4 h-4 text-[#25d366]" />
+                  <WhatsAppIcon className="w-4 h-4 text-black" />
                   <span>WhatsApp</span>
                 </a>
+                <Link
+                  href="/links"
+                  className="px-5 py-3 bg-[#FFE135] text-black font-black font-mono text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
+                >
+                  <LinkIcon className="w-4 h-4 text-black" />
+                  <span>Bio / Linktree</span>
+                </Link>
               </div>
             </div>
 
-            {/* Right — Avatar + stats */}
-            <div className="animate-slide-right flex flex-col items-center gap-6">
-              {/* Avatar container */}
+            {/* Right — Avatar + stats + Countdown */}
+            <div className="flex flex-col items-center gap-5">
+              {/* Avatar container with Neobrutalism frame */}
               <div className="relative">
-                <div className="w-64 h-64 md:w-80 md:h-72 rounded-2xl overflow-hidden border-2 border-[#4f8ef7]/40 glow-blue animate-float relative bg-[#12121a] group">
+                <div className="w-64 h-64 sm:w-72 sm:h-72 border-3 sm:border-4 border-black bg-white shadow-[6px_6px_0px_#000] overflow-hidden relative group">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/hero-banner.jpg"
-                    alt="Character Anime Banner"
-                    className="w-full h-full object-cover object-top filter brightness-95 contrast-105 group-hover:scale-105 transition-transform duration-500"
+                    alt="Character Banner"
+                    className="w-full h-full object-cover object-top filter brightness-100 group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       (e.target as HTMLElement).style.display = "none";
                     }}
                   />
-                  {/* Overlay gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-black/20 pointer-events-none" />
 
-                  {/* Watermark / Dev Badge aesthetic */}
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-black/70 backdrop-blur-md border border-[#4f8ef7]/40">
-                    <span className="text-[10px] font-mono text-[#00d4ff] font-bold">
-                      ● LIVE · REALTIME
+                  {/* Corner badge */}
+                  <div className="absolute top-2 left-2 px-2 py-0.5 bg-[#FFE135] border-2 border-black shadow-[2px_2px_0px_#000]">
+                    <span className="text-[10px] font-mono text-black font-black uppercase">
+                      PORTFOLIO
                     </span>
                   </div>
                 </div>
 
                 {/* Floating badge */}
-                <div className="absolute -bottom-3 -right-3 bg-[#12121a] border border-[#4f8ef7]/30 rounded-xl px-3 py-2 glow-blue">
-                  <p className="text-xs font-mono text-[#4f8ef7] font-bold">
+                <div className="absolute -bottom-3 -right-3 bg-[#00f0ff] border-2 border-black px-3 py-1 shadow-[3px_3px_0px_#000]">
+                  <p className="text-xs font-mono text-black font-black">
                     SMK · XI AKL
                   </p>
                 </div>
               </div>
 
-              {/* Realtime Birthday Countdown Flip Clock */}
+              {/* Realtime Birthday Countdown */}
               <BirthdayCountdown />
 
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-3 w-full max-w-xs">
+              {/* Stats tiles */}
+              <div className="grid grid-cols-3 gap-3 w-full max-w-sm">
                 {stats.map((s) => (
                   <div
                     key={s.label}
-                    className="bg-[#12121a] border border-[#1e1e2e] rounded-xl p-3 text-center"
+                    className="border-2 border-black p-2.5 text-center shadow-[3px_3px_0px_#000]"
+                    style={{ background: s.bg }}
                   >
-                    <p
-                      className="text-xs font-bold font-mono"
-                      style={{ color: s.color }}
-                    >
+                    <p className="text-xs font-black font-mono text-black">
                       {s.value}
                     </p>
-                    <p className="text-[10px] text-gray-600 font-mono mt-0.5">
+                    <p className="text-[10px] text-black font-mono font-bold uppercase mt-0.5">
                       {s.label}
                     </p>
                   </div>
@@ -594,116 +552,98 @@ export default function Home() {
 
         {/* ── ABOUT SECTION ────────────────────────────────────────── */}
         <FadeSection id="about">
-          <section className="py-24 px-4 bg-[#0d0d14]">
+          <section className="py-20 px-4 border-t-2 border-black bg-[var(--card-bg)]">
             <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <p className="text-xs tracking-[0.3em] text-[#4f8ef7] uppercase font-mono mb-3">
+              <div className="text-center mb-10">
+                <div className="inline-block px-3 py-1 bg-[#00f0ff] text-black border-2 border-black shadow-[2px_2px_0px_#000] font-mono text-xs font-black uppercase mb-3">
                   02. About
-                </p>
-                <h2 className="text-3xl md:text-4xl font-bold text-white">
-                  Tentang <span className="text-[#4f8ef7]">Aku</span>
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[var(--text-main)]">
+                  Tentang <span className="bg-[#FFE135] px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]">Aku</span>
                 </h2>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid md:grid-cols-2 gap-6">
                 {/* Bio card */}
-                <div className="bg-[#12121a] border border-[#1e1e2e] rounded-2xl p-6">
-                  <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[#1e1e2e]">
-                    <div className="flex gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+                <div className="bg-[var(--bg-main)] border-2 sm:border-3 border-black p-5 sm:p-6 shadow-[5px_5px_0px_#000]">
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b-2 border-black">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-3 h-3 border border-black bg-[#ff5555] inline-block" />
+                      <span className="w-3 h-3 border border-black bg-[#FFE135] inline-block" />
+                      <span className="w-3 h-3 border border-black bg-[#00ff66] inline-block" />
                     </div>
-                    <span className="text-xs text-gray-600 font-mono ml-2">
-                      about.json
+                    <span className="text-xs font-mono font-black uppercase text-[var(--text-main)]">
+                      profil.json
                     </span>
                   </div>
-                  <div className="font-mono text-sm space-y-2">
+                  <div className="font-mono text-xs sm:text-sm space-y-2 text-[var(--text-main)]">
                     <p>
-                      <span className="text-[#4f8ef7]">nama</span>:{" "}
-                      <span className="text-[#00ff88]">
-                        &quot;Muhammad Dafa Pratama&quot;
-                      </span>
+                      <span className="text-[#ff0055] font-black">&quot;nama&quot;</span>:{" "}
+                      <span className="font-bold">&quot;Muhammad Dafa Pratama&quot;</span>,
                     </p>
                     <p>
-                      <span className="text-[#4f8ef7]">sekolah</span>:{" "}
-                      <span className="text-[#00ff88]">&quot;SMK&quot;</span>
+                      <span className="text-[#ff0055] font-black">&quot;sekolah&quot;</span>:{" "}
+                      <span className="font-bold">&quot;SMK Negeri&quot;</span>,
                     </p>
                     <p>
-                      <span className="text-[#4f8ef7]">kelas</span>:{" "}
-                      <span className="text-[#00ff88]">
-                        &quot;XI (11)&quot;
-                      </span>
+                      <span className="text-[#ff0055] font-black">&quot;kelas&quot;</span>:{" "}
+                      <span className="font-bold">&quot;XI (11)&quot;</span>,
                     </p>
                     <p>
-                      <span className="text-[#4f8ef7]">jurusan</span>:{" "}
-                      <span className="text-[#00ff88]">&quot;AKL&quot;</span>
+                      <span className="text-[#ff0055] font-black">&quot;jurusan&quot;</span>:{" "}
+                      <span className="font-bold">&quot;Akuntansi dan Keuangan Lembaga (AKL)&quot;</span>,
                     </p>
                     <p>
-                      <span className="text-[#4f8ef7]">status</span>:{" "}
-                      <span className="text-[#00ff88]">
-                        &quot;Pelajar Aktif&quot;
-                      </span>
+                      <span className="text-[#ff0055] font-black">&quot;status&quot;</span>:{" "}
+                      <span className="font-bold">&quot;Pelajar Aktif&quot;</span>,
                     </p>
                     <p>
-                      <span className="text-[#4f8ef7]">passion</span>: [
+                      <span className="text-[#ff0055] font-black">&quot;minat&quot;</span>: [
                     </p>
-                    <p className="pl-4 text-[#00ff88]">
-                      &quot;Administrasi&quot;,
-                    </p>
-                    <p className="pl-4 text-[#00ff88]">
-                      &quot;Social Media&quot;,
-                    </p>
-                    <p className="pl-4 text-[#00ff88]">
-                      &quot;Teknologi Digital&quot;
-                    </p>
+                    <p className="pl-4 font-bold">&quot;Administrasi Keuangan&quot;,</p>
+                    <p className="pl-4 font-bold">&quot;Manajemen Media Sosial&quot;,</p>
+                    <p className="pl-4 font-bold">&quot;Teknologi Digital&quot;</p>
                     <p>]</p>
                   </div>
                 </div>
 
                 {/* Info tiles */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {[
                     {
-                      icon: (
-                        <GraduationCapIcon className="w-5 h-5 text-[#4f8ef7]" />
-                      ),
+                      icon: <GraduationCapIcon className="w-5 h-5 text-black" />,
                       title: "Pelajar SMK",
-                      desc: "Saat ini menempuh pendidikan di SMK Kelas XI jurusan Akuntansi Keuangan dan Lembaga (AKL).",
-                      color: "#4f8ef7",
+                      desc: "Menempuh pendidikan di SMK Kelas XI jurusan Akuntansi Keuangan dan Lembaga (AKL).",
+                      bg: "#00f0ff",
                     },
                     {
-                      icon: (
-                        <AccountingIcon className="w-5 h-5 text-[#00ff88]" />
-                      ),
-                      title: "AKL Enthusiast",
-                      desc: "Menguasai pembukuan, administrasi keuangan, serta tools seperti Microsoft Excel & Word.",
-                      color: "#00ff88",
+                      icon: <AccountingIcon className="w-5 h-5 text-black" />,
+                      title: "Keahlian AKL",
+                      desc: "Menguasai dasar pembukuan, administrasi transaksi, Microsoft Excel, dan Microsoft Word.",
+                      bg: "#00ff66",
                     },
                     {
-                      icon: (
-                        <SparklesIcon className="w-5 h-5 text-[#7c5cbf]" />
-                      ),
-                      title: "Digital Creator",
-                      desc: "Aktif di berbagai platform sosial media sebagai kreator konten digital.",
-                      color: "#7c5cbf",
+                      icon: <SparklesIcon className="w-5 h-5 text-black" />,
+                      title: "Digital & Social Media",
+                      desc: "Aktif mengelola media sosial, konten komunitas digital, dan interaksi online.",
+                      bg: "#FFE135",
                     },
                   ].map((item) => (
                     <div
                       key={item.title}
-                      className="bg-[#12121a] border border-[#1e1e2e] hover:border-[#4f8ef7]/30 rounded-xl p-4 flex gap-4 transition-all duration-200 hover:-translate-x-1"
+                      className="bg-[var(--bg-main)] border-2 border-black p-4 flex gap-4 items-center shadow-[4px_4px_0px_#000] hover:-translate-x-1 transition-all"
                     >
                       <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: `${item.color}20` }}
+                        className="w-11 h-11 border-2 border-black flex items-center justify-center flex-shrink-0 shadow-[2px_2px_0px_#000]"
+                        style={{ background: item.bg }}
                       >
                         {item.icon}
                       </div>
                       <div>
-                        <p className="font-bold text-white text-sm mb-1">
+                        <p className="font-mono font-black text-sm text-[var(--text-main)] uppercase">
                           {item.title}
                         </p>
-                        <p className="text-gray-400 text-xs leading-relaxed">
+                        <p className="text-xs font-mono text-[var(--text-main)] opacity-80 mt-0.5 leading-relaxed">
                           {item.desc}
                         </p>
                       </div>
@@ -714,8 +654,8 @@ export default function Home() {
 
               {/* Social links grid */}
               <div className="mt-10">
-                <p className="text-xs text-[#4f8ef7] font-mono mb-4 text-center tracking-widest uppercase font-semibold">
-                  Media Sosial &amp; Komunitas
+                <p className="text-xs font-mono font-black uppercase text-center mb-4 text-[var(--text-main)]">
+                  Akun Sosial Media &amp; Komunitas
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {socialLinks.map((s) => (
@@ -724,19 +664,17 @@ export default function Home() {
                       href={s.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3.5 bg-[#12121a] border border-[#1e1e2e] hover:border-[#4f8ef7]/50 rounded-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-lg group"
+                      className="flex items-center gap-3 p-3 border-2 border-black shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all group"
+                      style={{ background: s.bg }}
                     >
-                      <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
-                        style={{ background: `${s.color}18` }}
-                      >
+                      <div className="w-8 h-8 bg-white border border-black flex items-center justify-center flex-shrink-0 shadow-[1px_1px_0px_#000]">
                         {s.icon}
                       </div>
-                      <div className="overflow-hidden">
-                        <p className="text-xs font-bold text-white group-hover:text-[#4f8ef7] transition-colors">
+                      <div className="overflow-hidden text-left">
+                        <p className="text-xs font-black font-mono uppercase text-black">
                           {s.label}
                         </p>
-                        <p className="text-[11px] text-gray-500 font-mono truncate">
+                        <p className="text-[10px] font-mono text-black font-bold truncate opacity-80">
                           {s.username}
                         </p>
                       </div>
@@ -750,35 +688,35 @@ export default function Home() {
 
         {/* ── SKILLS SECTION ───────────────────────────────────────── */}
         <FadeSection id="skills">
-          <section className="py-24 px-4">
+          <section className="py-20 px-4">
             <div className="max-w-2xl mx-auto">
-              <div className="text-center mb-12">
-                <p className="text-xs tracking-[0.3em] text-[#4f8ef7] uppercase font-mono mb-3">
+              <div className="text-center mb-10">
+                <div className="inline-block px-3 py-1 bg-[#ff70a6] text-black border-2 border-black shadow-[2px_2px_0px_#000] font-mono text-xs font-black uppercase mb-3">
                   03. Skills
-                </p>
-                <h2 className="text-3xl md:text-4xl font-bold text-white">
-                  Keahlian <span className="text-[#4f8ef7]">Ku</span>
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[var(--text-main)]">
+                  Keahlian <span className="bg-[#00ff66] px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]">Ku</span>
                 </h2>
               </div>
 
               <div className="space-y-4">
-                {skills.map((skill, i) => (
-                  <SkillBar key={skill.name} skill={skill} delay={i * 150} />
+                {skills.map((skill) => (
+                  <SkillBar key={skill.name} skill={skill} />
                 ))}
               </div>
 
-              {/* WA Community */}
-              <div className="mt-10 bg-[#12121a] border border-[#25d366]/20 rounded-2xl p-6 shadow-[0_0_30px_rgba(37,211,102,0.05)]">
+              {/* WA Community Card */}
+              <div className="mt-8 bg-[var(--card-bg)] border-2 sm:border-3 border-black p-5 sm:p-6 shadow-[5px_5px_0px_#000]">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-[#25d366]/15 flex items-center justify-center">
-                    <WhatsAppIcon className="w-6 h-6 text-[#25d366]" />
+                  <div className="w-10 h-10 bg-[#00ff66] border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]">
+                    <WhatsAppIcon className="w-6 h-6 text-black" />
                   </div>
                   <div>
-                    <p className="font-bold text-white text-sm">
-                      Bergabung di Komunitas Resmi
+                    <p className="font-mono font-black text-sm uppercase text-[var(--text-main)]">
+                      Komunitas &amp; Saluran WhatsApp
                     </p>
-                    <p className="text-xs text-gray-400">
-                      Grup & Saluran WhatsApp
+                    <p className="text-xs font-mono text-[var(--text-main)] opacity-70">
+                      Grup diskusi dan update seputar aktivitas Dafa
                     </p>
                   </div>
                 </div>
@@ -787,19 +725,19 @@ export default function Home() {
                     href="https://chat.whatsapp.com/BA2BZeMGysXGOJI0JxF8Yb"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-[#25d366]/15 border border-[#25d366]/40 text-[#25d366] text-xs font-mono font-bold hover:bg-[#25d366]/25 transition-all active:scale-95"
+                    className="flex-1 inline-flex items-center justify-center gap-2 py-3 bg-[#00ff66] text-black border-2 border-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                   >
-                    <WhatsAppIcon className="w-4 h-4" />
-                    <span>Join WA Group</span>
+                    <WhatsAppIcon className="w-4 h-4 text-black" />
+                    <span>Gabung Grup WA</span>
                   </a>
                   <a
                     href="https://whatsapp.com/channel/0029Vb89x3U5fM5VSAMCHQ16"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-[#00d4ff]/15 border border-[#00d4ff]/40 text-[#00d4ff] text-xs font-mono font-bold hover:bg-[#00d4ff]/25 transition-all active:scale-95"
+                    className="flex-1 inline-flex items-center justify-center gap-2 py-3 bg-[#00f0ff] text-black border-2 border-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                   >
-                    <BroadcastIcon className="w-4 h-4" />
-                    <span>Follow WA Channel</span>
+                    <BroadcastIcon className="w-4 h-4 text-black" />
+                    <span>Ikuti Saluran WA</span>
                   </a>
                 </div>
               </div>
@@ -818,15 +756,22 @@ export default function Home() {
         </FadeSection>
 
         {/* ── FOOTER ───────────────────────────────────────────────── */}
-        <footer className="py-8 px-4 border-t border-[#1e1e2e] text-center">
-          <p className="text-xs text-gray-600 font-mono">
-            Built with modern technology by{" "}
-            <span className="text-[#4f8ef7]">Muhammad Dafa Pratama</span> ·{" "}
-            {new Date().getFullYear()}
+        <footer className="py-8 px-4 border-t-2 sm:border-t-3 border-black bg-[var(--card-bg)] text-center">
+          <p className="text-xs font-mono font-bold text-[var(--text-main)]">
+            Dibuat oleh <span className="bg-[#FFE135] text-black px-1.5 py-0.5 border border-black">Muhammad Dafa Pratama</span> · {new Date().getFullYear()}
           </p>
-          <p className="text-[10px] text-gray-700 font-mono mt-1">
-            SMK XI AKL · Indonesia
-          </p>
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <Link
+              href="/links"
+              className="text-xs font-mono font-black underline text-[var(--text-main)] hover:text-[#00f0ff]"
+            >
+              Halaman Linktree
+            </Link>
+            <span className="text-[var(--text-main)]">·</span>
+            <span className="text-[10px] font-mono text-[var(--text-main)] opacity-70">
+              SMK XI AKL · Indonesia
+            </span>
+          </div>
         </footer>
       </main>
     </>

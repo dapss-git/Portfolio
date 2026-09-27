@@ -18,12 +18,11 @@ export default function SliderVerify({ onVerified }: SliderVerifyProps) {
   const dragXRef = useRef(0);
   const verifiedRef = useRef(false);
 
-  const THUMB_WIDTH = 48; // 48px width of thumb
+  const THUMB_WIDTH = 48;
 
   const getMaxDist = () => {
     if (!trackRef.current) return 240;
-    // 8px = 4px padding on each side
-    return Math.max(0, trackRef.current.clientWidth - THUMB_WIDTH - 8);
+    return Math.max(0, trackRef.current.clientWidth - THUMB_WIDTH - 6);
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -40,12 +39,10 @@ export default function SliderVerify({ onVerified }: SliderVerifyProps) {
     setFailed(false);
 
     const rect = track.getBoundingClientRect();
-    const touchXOnTrack = e.clientX - rect.left - 4; // account for 4px padding
+    const touchXOnTrack = e.clientX - rect.left - 3;
     const maxDist = getMaxDist();
 
-    // If tapped near or ahead of current position, update position immediately
     const targetX = Math.max(0, Math.min(touchXOnTrack - THUMB_WIDTH / 2, maxDist));
-    // If touched near current thumb, keep offset smoothly
     if (Math.abs(touchXOnTrack - dragXRef.current) < THUMB_WIDTH) {
       startXRef.current = e.clientX - dragXRef.current;
     } else {
@@ -83,12 +80,12 @@ export default function SliderVerify({ onVerified }: SliderVerifyProps) {
       setDragX(maxDist);
       setTimeout(() => {
         onVerified();
-      }, 400);
+      }, 350);
     } else {
       setFailed(true);
       dragXRef.current = 0;
       setDragX(0);
-      setTimeout(() => setFailed(false), 800);
+      setTimeout(() => setFailed(false), 700);
     }
   };
 
@@ -97,11 +94,11 @@ export default function SliderVerify({ onVerified }: SliderVerifyProps) {
 
   return (
     <div className="select-none touch-none">
-      <p className="text-xs text-gray-400 mb-2 font-mono text-center">
+      <p className="text-xs font-mono font-bold uppercase tracking-wider mb-2 text-center text-[var(--text-main)]">
         {verified
-          ? "Terverifikasi!"
+          ? "✓ Terverifikasi!"
           : failed
-          ? "Kurang jauh — geser sampai penuh"
+          ? "! Geser sampai ujung kanan"
           : "Geser ke kanan untuk verifikasi"}
       </p>
 
@@ -111,33 +108,33 @@ export default function SliderVerify({ onVerified }: SliderVerifyProps) {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        className={`relative h-14 rounded-2xl overflow-hidden p-1 touch-none cursor-pointer transition-colors duration-300 ${
+        className={`relative h-14 border-2 border-black shadow-[3px_3px_0px_#000] p-1 touch-none cursor-pointer transition-colors ${
           verified
-            ? "bg-[#00ff88]/15 border border-[#00ff88]/40 cursor-default"
+            ? "bg-[#00ff66]"
             : failed
-            ? "bg-red-500/15 border border-red-500/40"
-            : "bg-[#161622] border border-[#2a2a3e] hover:border-[#4f8ef7]/40"
+            ? "bg-[#ff4444]"
+            : "bg-[var(--card-bg)]"
         }`}
       >
         {/* Progress Fill */}
         <div
-          className="absolute inset-y-0 left-0 rounded-2xl pointer-events-none"
+          className="absolute inset-y-0 left-0 pointer-events-none"
           style={{
             width: `${dragX + THUMB_WIDTH}px`,
             background: verified
-              ? "linear-gradient(90deg, rgba(0,255,136,0.3), rgba(0,255,136,0.1))"
+              ? "#00ff66"
               : failed
-              ? "linear-gradient(90deg, rgba(239,68,68,0.3), rgba(239,68,68,0.1))"
-              : "linear-gradient(90deg, rgba(79,142,247,0.35), rgba(124,92,191,0.2))",
-            transition: isDragging ? "none" : "width 0.25s ease-out",
+              ? "#ff6666"
+              : "#00f0ff",
+            transition: isDragging ? "none" : "width 0.2s ease-out",
           }}
         />
 
         {/* Track hint label */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span
-            className={`text-xs font-mono tracking-widest uppercase transition-opacity duration-200 ${
-              progressPct > 35 ? "opacity-0" : "opacity-50 text-gray-400"
+            className={`text-xs font-mono font-black tracking-widest uppercase transition-opacity duration-150 ${
+              progressPct > 35 ? "opacity-0" : "opacity-75 text-black"
             }`}
           >
             Geser ke kanan →
@@ -146,39 +143,37 @@ export default function SliderVerify({ onVerified }: SliderVerifyProps) {
 
         {/* Draggable Thumb */}
         <div
-          className={`absolute top-1 bottom-1 w-12 rounded-xl flex items-center justify-center pointer-events-none touch-none select-none z-10 transition-shadow duration-200 ${
+          className={`absolute top-1 bottom-1 w-12 border-2 border-black flex items-center justify-center pointer-events-none touch-none select-none z-10 font-black ${
             verified
-              ? "bg-[#00ff88] shadow-[0_0_20px_rgba(0,255,136,0.6)]"
+              ? "bg-black text-[#00ff66]"
               : failed
-              ? "bg-red-500"
+              ? "bg-black text-[#ff4444]"
               : isDragging
-              ? "bg-[#4f8ef7] shadow-[0_0_20px_rgba(79,142,247,0.8)] scale-95"
-              : "bg-[#4f8ef7] shadow-[0_0_15px_rgba(79,142,247,0.4)]"
+              ? "bg-[#FFE135] text-black shadow-[2px_2px_0px_#000]"
+              : "bg-[#FFE135] text-black shadow-[2px_2px_0px_#000]"
           }`}
           style={{
             transform: `translateX(${dragX}px)`,
-            transition: isDragging ? "none" : "transform 0.25s ease-out",
+            transition: isDragging ? "none" : "transform 0.2s ease-out",
           }}
         >
           {verified ? (
             <svg
-              className="w-5 h-5 text-[#0d0d14]"
+              className="w-6 h-6 stroke-[3]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth={3}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              <path strokeLinecap="square" strokeLinejoin="miter" d="M5 13l4 4L19 7" />
             </svg>
           ) : (
             <svg
-              className="w-5 h-5 text-white"
+              className="w-6 h-6 stroke-[3]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              strokeWidth={2.5}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              <path strokeLinecap="square" strokeLinejoin="miter" d="M9 5l7 7-7 7" />
             </svg>
           )}
         </div>

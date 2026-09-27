@@ -2,14 +2,16 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
+import { ThemeProvider } from "./ThemeContext";
+
 const inter = Inter({ subsets: ["latin"] });
 
-// Resolve site URL dynamically for Vercel production or fallback
+// Resolve site URL dynamically for custom domain, Vercel, or fallback
 const rawSiteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.VERCEL_PROJECT_PRODUCTION_URL ||
   process.env.VERCEL_URL ||
-  "portfolio-daps.vercel.app";
+  "portfolio.daps.my.id";
 
 const siteUrl = rawSiteUrl.startsWith("http")
   ? rawSiteUrl
@@ -68,8 +70,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className="scroll-smooth">
-      <body className={`${inter.className} bg-[#0a0a0f] text-gray-100`}>
-        {children}
+      <body className={`${inter.className}`}>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

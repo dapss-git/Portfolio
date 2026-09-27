@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { ThemeSwitcher } from "./ThemeContext";
+import { LinkIcon } from "./Icons";
 
 interface NavbarProps {
   activeSection: string;
@@ -11,7 +14,7 @@ const navLinks = [
   { href: "#about", label: "About" },
   { href: "#skills", label: "Skills" },
   { href: "#contact", label: "Contact" },
-  { href: "#payment", label: "Payment" },
+  { href: "#payment", label: "Support" },
 ];
 
 export default function Navbar({ activeSection }: NavbarProps) {
@@ -33,109 +36,128 @@ export default function Navbar({ activeSection }: NavbarProps) {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
           scrolled
-            ? "bg-[#0a0a0f]/90 backdrop-blur-xl border-b border-[#1e1e2e]"
-            : "bg-transparent"
+            ? "bg-[var(--card-bg)] border-b-2 sm:border-b-3 border-black shadow-[0_4px_0px_#000]"
+            : "bg-[var(--bg-main)]/90 backdrop-blur-md border-b-2 border-black"
         }`}
       >
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <button
             onClick={() => handleNav("#home")}
-            className="font-mono text-sm font-bold tracking-wider"
+            className="font-mono text-sm sm:text-base font-black tracking-wider px-3 py-1.5 bg-[#FFE135] text-black border-2 border-black shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
           >
-            <span className="text-[#4f8ef7]">&lt;</span>
-            <span className="text-white">Dafa</span>
-            <span className="text-[#4f8ef7]">/&gt;</span>
+            <span>&lt;Dafa/&gt;</span>
           </button>
 
           {/* Desktop links */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-2">
             {navLinks.map((link) => {
               const isActive = activeSection === link.href.replace("#", "");
               return (
                 <button
                   key={link.href}
                   onClick={() => handleNav(link.href)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 font-mono ${
+                  className={`px-3 py-1.5 rounded-none text-xs font-bold font-mono uppercase tracking-wide border-2 transition-all ${
                     isActive
-                      ? "text-[#4f8ef7] bg-[#4f8ef7]/10 text-glow-blue"
-                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                      ? "bg-[#00f0ff] text-black border-black shadow-[2px_2px_0px_#000] -translate-y-0.5"
+                      : "bg-transparent text-[var(--text-main)] border-transparent hover:border-black hover:bg-black/5 dark:hover:bg-white/10"
                   }`}
                 >
-                  {isActive && (
-                    <span className="text-[#4f8ef7] mr-1 text-xs">&gt;</span>
-                  )}
                   {link.label}
                 </button>
               );
             })}
+
+            {/* Link to Linktree page */}
+            <Link
+              href="/links"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff66] text-black border-2 border-black font-mono font-bold text-xs shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all ml-1"
+            >
+              <LinkIcon className="w-3.5 h-3.5" />
+              <span>Linktree</span>
+            </Link>
+
+            {/* Theme switcher */}
+            <div className="ml-2 pl-2 border-l-2 border-black">
+              <ThemeSwitcher />
+            </div>
           </div>
 
-          {/* Burger button */}
-          <button
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-label="Toggle menu"
-            className="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-lg hover:bg-white/5 transition-colors"
-          >
-            <span
-              className={`block w-5 h-0.5 bg-white transition-all duration-300 ${
-                menuOpen ? "rotate-45 translate-y-2" : ""
-              }`}
-            />
-            <span
-              className={`block w-5 h-0.5 bg-white transition-all duration-300 ${
-                menuOpen ? "opacity-0" : ""
-              }`}
-            />
-            <span
-              className={`block w-5 h-0.5 bg-white transition-all duration-300 ${
-                menuOpen ? "-rotate-45 -translate-y-2" : ""
-              }`}
-            />
-          </button>
+          {/* Right side for mobile: Theme switcher + Burger button */}
+          <div className="flex md:hidden items-center gap-2">
+            <ThemeSwitcher />
+
+            <Link
+              href="/links"
+              className="px-2.5 py-1.5 bg-[#00ff66] text-black border-2 border-black font-mono font-black text-xs shadow-[2px_2px_0px_#000]"
+              title="Linktree"
+            >
+              <LinkIcon className="w-4 h-4" />
+            </Link>
+
+            <button
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label="Toggle menu"
+              className="w-10 h-10 flex flex-col items-center justify-center gap-1 bg-[var(--card-bg)] border-2 border-black shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+            >
+              <span
+                className={`block w-5 h-0.5 bg-[var(--text-main)] transition-all duration-200 ${
+                  menuOpen ? "rotate-45 translate-y-1.5" : ""
+                }`}
+              />
+              <span
+                className={`block w-5 h-0.5 bg-[var(--text-main)] transition-all duration-200 ${
+                  menuOpen ? "opacity-0" : ""
+                }`}
+              />
+              <span
+                className={`block w-5 h-0.5 bg-[var(--text-main)] transition-all duration-200 ${
+                  menuOpen ? "-rotate-45 -translate-y-1.5" : ""
+                }`}
+              />
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Mobile menu overlay */}
       <div
-        className={`fixed inset-0 z-40 transition-all duration-300 md:hidden ${
+        className={`fixed inset-0 z-40 transition-all duration-200 md:hidden ${
           menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
-        style={{ background: "rgba(10,10,15,0.97)", backdropFilter: "blur(20px)" }}
+        style={{
+          background: "var(--bg-main)",
+        }}
       >
-        {/* Grid bg */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(79,142,247,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(79,142,247,0.5) 1px, transparent 1px)",
-            backgroundSize: "30px 30px",
-          }}
-        />
-        <div className="relative z-10 flex flex-col items-center justify-center h-full gap-6">
+        <div className="flex flex-col items-center justify-center h-full gap-4 px-6 pt-16">
           {navLinks.map((link, i) => {
             const isActive = activeSection === link.href.replace("#", "");
             return (
               <button
                 key={link.href}
                 onClick={() => handleNav(link.href)}
-                className={`text-2xl font-bold font-mono tracking-wider transition-all duration-200 ${
-                  isActive ? "text-[#4f8ef7] text-glow-blue" : "text-gray-300 hover:text-white"
+                className={`w-full max-w-xs py-3 text-lg font-black font-mono uppercase tracking-wider border-2 border-black transition-all ${
+                  isActive
+                    ? "bg-[#00f0ff] text-black shadow-[4px_4px_0px_#000]"
+                    : "bg-[var(--card-bg)] text-[var(--text-main)] shadow-[3px_3px_0px_#000]"
                 }`}
-                style={{
-                  animationDelay: `${i * 80}ms`,
-                  opacity: menuOpen ? 1 : 0,
-                  transform: menuOpen ? "translateY(0)" : "translateY(20px)",
-                  transition: `opacity 0.3s ${i * 80}ms, transform 0.3s ${i * 80}ms`,
-                }}
               >
-                <span className="text-[#4f8ef7] text-sm mr-2">0{i + 1}.</span>
+                <span className="text-[#ff0055] mr-2">0{i + 1}.</span>
                 {link.label}
               </button>
             );
           })}
+
+          <Link
+            href="/links"
+            onClick={() => setMenuOpen(false)}
+            className="w-full max-w-xs py-3 text-lg font-black font-mono uppercase tracking-wider border-2 border-black bg-[#00ff66] text-black shadow-[4px_4px_0px_#000] text-center flex items-center justify-center gap-2"
+          >
+            <LinkIcon className="w-5 h-5" />
+            <span>Linktree / Bio</span>
+          </Link>
         </div>
       </div>
     </>
