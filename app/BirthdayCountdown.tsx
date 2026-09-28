@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CalendarIcon } from "./Icons";
+import { useLanguage } from "./LanguageContext";
 
 interface TimeRemaining {
   days: number;
@@ -137,6 +138,7 @@ function FlipUnit({ value, label }: { value: number; label: string }) {
 export default function BirthdayCountdown() {
   const [timeLeft, setTimeLeft] = useState<TimeRemaining>(calculateTimeUntilBirthday);
   const [mounted, setMounted] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     setMounted(true);
@@ -159,36 +161,36 @@ export default function BirthdayCountdown() {
             <CalendarIcon className="w-3.5 h-3.5" />
           </div>
           <span className="text-xs font-black font-mono tracking-wide">
-            Ulang Tahun Dafa
+            {t.countdown.title}
           </span>
         </div>
         <span className="px-2 py-0.5 rounded-md border-2 border-black bg-[#00F0FF] text-black text-[10px] font-mono font-bold shadow-[1px_1px_0px_#000]">
-          {timeLeft.isToday ? "HARI INI!" : "28 Agustus"}
+          {timeLeft.isToday ? "TODAY!" : `${t.countdown.targetPrefix} 2009`}
         </span>
       </div>
 
       {/* Flip Clock Grid */}
       <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-        <FlipUnit value={timeLeft.days} label="Hari" />
+        <FlipUnit value={timeLeft.days} label={t.countdown.days} />
         <span className="text-black dark:text-white font-black text-xl font-mono -mt-6">
           :
         </span>
-        <FlipUnit value={timeLeft.hours} label="Jam" />
+        <FlipUnit value={timeLeft.hours} label={t.countdown.hours} />
         <span className="text-black dark:text-white font-black text-xl font-mono -mt-6">
           :
         </span>
-        <FlipUnit value={timeLeft.minutes} label="Menit" />
+        <FlipUnit value={timeLeft.minutes} label={t.countdown.mins} />
         <span className="text-black dark:text-white font-black text-xl font-mono -mt-6">
           :
         </span>
-        <FlipUnit value={timeLeft.seconds} label="Detik" />
+        <FlipUnit value={timeLeft.seconds} label={t.countdown.secs} />
       </div>
 
       {/* Footer Subtext */}
       <p className="text-center text-[11px] text-gray-600 dark:text-gray-400 font-mono font-medium mt-3">
         {timeLeft.isToday
-          ? "Selamat Ulang Tahun Muhammad Dafa Pratama!"
-          : "Menuju 28 Agustus (WIB) · Muhammad Dafa Pratama"}
+          ? "Happy Birthday Muhammad Dafa Pratama!"
+          : `${t.countdown.targetPrefix} (WIB) · Muhammad Dafa Pratama`}
       </p>
     </div>
   );

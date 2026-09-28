@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import SliderVerify from "./SliderVerify";
+import { useLanguage } from "./LanguageContext";
 import {
   WhatsAppIcon,
   TelegramIcon,
@@ -15,6 +16,7 @@ export default function ContactSection() {
   const [form, setForm] = useState({ name: "", contact: "", message: "" });
   const [status, setStatus] = useState<SendStatus>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const { t } = useLanguage();
 
   const handleVerified = () => setStatus("verified");
 
@@ -59,19 +61,19 @@ export default function ContactSection() {
         {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-block px-3 py-1 bg-[#FFE135] text-black border-2 border-black shadow-[2px_2px_0px_#000] font-mono text-xs font-black uppercase mb-3">
-            04. Contact
+            {t.contact.badge}
           </div>
           <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[var(--text-main)] mb-3">
-            Hubungi{" "}
+            {t.contact.titlePre}{" "}
             <span
               style={{ backgroundColor: "var(--accent-primary)" }}
               className="px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]"
             >
-              Aku
+              {t.contact.titlePost}
             </span>
           </h2>
           <p className="text-sm font-mono opacity-80 text-[var(--text-main)]">
-            Ada pertanyaan atau ingin kolaborasi? Kirim pesan langsung ke bot Telegram ku!
+            {t.contact.desc}
           </p>
         </div>
 
@@ -131,7 +133,7 @@ export default function ContactSection() {
               <span className="w-3.5 h-3.5 border-2 border-black bg-[#00ff66] inline-block" />
             </div>
             <span className="text-xs font-mono font-black uppercase tracking-wider text-[var(--text-main)]">
-              FORM_PESAN.SYS
+              {t.contact.formBar}
             </span>
           </div>
 
@@ -149,17 +151,17 @@ export default function ContactSection() {
               </div>
               <div>
                 <p className="text-xl font-black font-mono uppercase text-[var(--text-main)]">
-                  Pesan Berhasil Terkirim!
+                  {t.contact.successTitle}
                 </p>
                 <p className="text-xs font-mono text-[var(--text-main)] mt-2">
-                  Notifikasi sudah langsung masuk ke Telegram ku. Aku akan respon ke kontak yang kamu berikan.
+                  {t.contact.successDesc}
                 </p>
               </div>
               <button
                 onClick={() => setStatus("idle")}
                 className="mt-3 px-5 py-2.5 bg-[#FFE135] text-black border-2 border-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
               >
-                Kirim Pesan Lain
+                {t.contact.btnSendAnother}
               </button>
             </div>
           ) : (
@@ -167,11 +169,11 @@ export default function ContactSection() {
               {/* Name */}
               <div>
                 <label className="text-xs font-mono font-black uppercase text-[var(--text-main)] mb-1.5 block">
-                  Nama Lengkap / Panggilan:
+                  {t.contact.labelName}
                 </label>
                 <input
                   type="text"
-                  placeholder="Masukkan nama kamu..."
+                  placeholder={t.contact.phName}
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   disabled={status === "loading"}
@@ -182,11 +184,11 @@ export default function ContactSection() {
               {/* Contact */}
               <div>
                 <label className="text-xs font-mono font-black uppercase text-[var(--text-main)] mb-1.5 block">
-                  Kontak Balasan (No. WA / Username Telegram):
+                  {t.contact.labelContact}
                 </label>
                 <input
                   type="text"
-                  placeholder="Contoh: 08123456789 atau @username"
+                  placeholder={t.contact.phContact}
                   value={form.contact}
                   onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))}
                   disabled={status === "loading"}
@@ -197,10 +199,10 @@ export default function ContactSection() {
               {/* Message */}
               <div>
                 <label className="text-xs font-mono font-black uppercase text-[var(--text-main)] mb-1.5 block">
-                  Pesan:
+                  {t.contact.labelMsg}
                 </label>
                 <textarea
-                  placeholder="Tulis pesan atau keperluan kamu..."
+                  placeholder={t.contact.phMsg}
                   rows={4}
                   value={form.message}
                   onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
@@ -226,7 +228,7 @@ export default function ContactSection() {
                       <path strokeLinecap="square" strokeLinejoin="miter" d="M5 13l4 4L19 7" />
                     </svg>
                     <span className="text-xs font-mono font-black uppercase tracking-wider">
-                      Terverifikasi — Siap Dikirim!
+                      {t.contact.readyToSend}
                     </span>
                   </div>
                 ) : null}
@@ -260,7 +262,7 @@ export default function ContactSection() {
                     : "bg-gray-300 dark:bg-gray-800 text-gray-500 cursor-not-allowed shadow-[2px_2px_0px_#000]"
                 }`}
               >
-                {status === "loading" ? "Mengirim Pesan..." : "Kirim Pesan Sekarang →"}
+                {status === "loading" ? t.contact.btnSending : t.contact.btnSend}
               </button>
             </div>
           )}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ThemeSwitcher } from "../ThemeContext";
+import { LanguageSwitcher, useLanguage } from "../LanguageContext";
 import {
   WhatsAppIcon,
   TelegramIcon,
@@ -22,6 +23,8 @@ import {
 
 // ─── QRIS Modal ───────────────────────────────────────────────────────────────
 function QrisModal({ onClose }: { onClose: () => void }) {
+  const { t } = useLanguage();
+
   const handleDownload = () => {
     const a = document.createElement("a");
     a.href = "/qris.jpeg";
@@ -45,10 +48,10 @@ function QrisModal({ onClose }: { onClose: () => void }) {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-black bg-[#f4f4f5] hover:bg-gray-200 text-xs font-mono font-bold shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
           >
             <ArrowLeftIcon className="w-4 h-4" />
-            Back
+            {t.payment.modalClose}
           </button>
           <span className="text-xs font-black font-mono tracking-wider uppercase bg-[#FFE600] px-2 py-0.5 rounded border border-black">
-            QRIS Pembayaran
+            {t.payment.modalBadge}
           </span>
         </div>
 
@@ -58,36 +61,39 @@ function QrisModal({ onClose }: { onClose: () => void }) {
           <img
             src="/qris.jpeg"
             alt="QRIS Payment Dafa Pratama"
-            className="w-full h-auto object-contain rounded-lg"
+            className="w-full h-auto object-contain"
           />
         </div>
 
-        <p className="text-[11px] text-gray-700 font-mono text-center font-bold">
-          Muhammad Dafa Pratama · Dana / Gopay / OVO / ShopeePay / Bank
+        {/* Info */}
+        <p className="text-xs font-mono font-bold text-center text-gray-700">
+          {t.payment.modalInfo}
         </p>
 
-        {/* Download button */}
+        {/* Download Button */}
         <button
           onClick={handleDownload}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#FFE600] hover:bg-[#ffe033] border-2 border-black text-black font-black font-mono text-sm shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-black bg-[#00FF66] text-black font-mono font-black text-sm uppercase shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
         >
           <DownloadIcon className="w-4 h-4" />
-          Download Gambar QRIS
+          <span>{t.payment.modalDownload}</span>
         </button>
       </div>
     </div>
   );
 }
 
+// ─── Main Linktree Page Component ─────────────────────────────────────────────
 export default function LinksPage() {
   const [showQris, setShowQris] = useState(false);
   const [copiedText, setCopiedText] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const { t } = useLanguage();
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     setCopiedText(label);
-    setToast(`${label} berhasil disalin!`);
+    setToast(`${label} ${t.linksPage.copiedToast}`);
     setTimeout(() => {
       setCopiedText(null);
       setToast(null);
@@ -103,48 +109,48 @@ export default function LinksPage() {
         url,
       }).catch(() => {});
     } else {
-      handleCopy(url, "Link Profil");
+      handleCopy(url, "Link");
     }
   };
 
-interface LinkItem {
-  title: string;
-  subtitle: string;
-  icon: React.ReactNode;
-  href: string;
-  badge?: string;
-  highlight?: boolean;
-}
+  interface LinkItem {
+    title: string;
+    subtitle: string;
+    icon: React.ReactNode;
+    href: string;
+    badge?: string;
+    highlight?: boolean;
+  }
 
-interface LinkCategory {
-  category: string;
-  color: string;
-  links: LinkItem[];
-}
+  interface LinkCategory {
+    category: string;
+    color: string;
+    links: LinkItem[];
+  }
 
   const linkSections: LinkCategory[] = [
     {
-      category: "WhatsApp & Komunitas",
+      category: t.linksPage.catWa,
       color: "#25d366",
       links: [
         {
-          title: "WhatsApp Chat Pribadi",
-          subtitle: "Kirim pesan / ngobrol langsung",
+          title: t.linksPage.waPersonal,
+          subtitle: t.linksPage.waPersonalSub,
           icon: <WhatsAppIcon className="w-5 h-5 text-[#25d366]" />,
           href: "https://wa.me/62895393325895",
           highlight: true,
-          badge: "Chat Dafa",
+          badge: "Chat",
         },
         {
-          title: "WhatsApp Group Komunitas",
-          subtitle: "Gabung ke grup diskusi & silaturahmi",
+          title: t.linksPage.waGroup,
+          subtitle: t.linksPage.waGroupSub,
           icon: <WhatsAppIcon className="w-5 h-5 text-[#25d366]" />,
           href: "https://chat.whatsapp.com/BA2BZeMGysXGOJI0JxF8Yb",
-          badge: "Group WA",
+          badge: "Group",
         },
         {
-          title: "WhatsApp Saluran Resmi",
-          subtitle: "Info update & pengumuman terbaru",
+          title: t.linksPage.waChannel,
+          subtitle: t.linksPage.waChannelSub,
           icon: <BroadcastIcon className="w-5 h-5 text-[#00d4ff]" />,
           href: "https://whatsapp.com/channel/0029Vb89x3U5fM5VSAMCHQ16",
           badge: "Channel",
@@ -152,11 +158,11 @@ interface LinkCategory {
       ],
     },
     {
-      category: "Media Sosial Resmi",
+      category: t.linksPage.catSocial,
       color: "#00F0FF",
       links: [
         {
-          title: "Telegram Pribadi",
+          title: "Telegram",
           subtitle: "@dafaaaaa11111",
           icon: <TelegramIcon className="w-5 h-5 text-[#229ed9]" />,
           href: "https://t.me/dafaaaaa11111",
@@ -182,11 +188,11 @@ interface LinkCategory {
       ],
     },
     {
-      category: "Dukungan & Donasi",
+      category: t.linksPage.catSupport,
       color: "#FFE600",
       links: [
         {
-          title: "Saweria Dafa",
+          title: t.payment.saweriaTitle,
           subtitle: "saweria.co/dafaaaaa1111",
           icon: <SaweriaIcon className="w-6 h-6" />,
           href: "https://saweria.co/dafaaaaa1111",
@@ -212,24 +218,25 @@ interface LinkCategory {
         )}
 
         <div className="w-full max-w-md flex flex-col items-center">
-          {/* Top Bar (Back to Home & Theme Switcher) */}
+          {/* Top Bar (Back to Home & Language & Theme Switcher) */}
           <div className="w-full flex items-center justify-between mb-6 pb-3 border-b-2 border-black">
             <Link
               href="/"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-black bg-white dark:bg-[#18181f] text-black dark:text-white font-mono text-xs font-black shadow-[2px_2px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
             >
               <ArrowLeftIcon className="w-3.5 h-3.5" />
-              <span>Website Portfolio</span>
+              <span>{t.linksPage.backHome}</span>
             </Link>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={handleShare}
-                title="Bagikan Halaman Ini"
+                title={t.linksPage.shareTooltip}
                 className="p-1.5 rounded-lg border-2 border-black bg-white dark:bg-[#18181f] text-black dark:text-white shadow-[2px_2px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
               >
                 <ShareNodesIcon className="w-4 h-4" />
               </button>
+              <LanguageSwitcher />
               <ThemeSwitcher />
             </div>
           </div>
@@ -246,7 +253,10 @@ interface LinkCategory {
                   className="w-full h-full object-cover object-top"
                 />
               </div>
-              <span className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-[#00F0FF] border-2 border-black flex items-center justify-center text-xs font-black shadow-[1px_1px_0px_#000]">
+              <span
+                style={{ backgroundColor: "var(--accent-primary)" }}
+                className="absolute bottom-0 right-0 w-6 h-6 rounded-full border-2 border-black flex items-center justify-center text-xs font-black shadow-[1px_1px_0px_#000]"
+              >
                 ✓
               </span>
             </div>
@@ -259,7 +269,7 @@ interface LinkCategory {
               @dafaaaaa11111
             </p>
             <p className="text-xs font-medium text-gray-700 dark:text-gray-300 font-mono max-w-xs leading-relaxed bg-[#f4f4f5] dark:bg-[#27272a] p-2.5 rounded-xl border border-black">
-              Siswa SMK Kelas XI AKL · Digital Creator & Content Creator
+              {t.linksPage.profileDesc}
             </p>
           </div>
 
@@ -315,7 +325,7 @@ interface LinkCategory {
             <div className="w-full">
               <p className="text-xs font-black font-mono uppercase tracking-wider mb-2.5 px-1 text-black dark:text-white flex items-center gap-2">
                 <span className="w-2.5 h-2.5 border-2 border-black rounded-sm bg-[#FF5C8D]" />
-                <span>Transfer Langsung & QRIS</span>
+                <span>{t.payment.badge}</span>
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
@@ -350,12 +360,12 @@ interface LinkCategory {
                       {copiedText === p.label ? (
                         <>
                           <CheckIcon className="w-3 h-3 text-black" />
-                          <span>Tersalin</span>
+                          <span>{t.payment.copiedBtn}</span>
                         </>
                       ) : (
                         <>
                           <CopyIcon className="w-3 h-3 text-black" />
-                          <span>Salin</span>
+                          <span>{t.payment.copyBtn}</span>
                         </>
                       )}
                     </button>
@@ -373,26 +383,26 @@ interface LinkCategory {
                     <QrCodeIcon className="w-5 h-5 text-black" />
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-black font-mono">Buka QRIS Fullscreen</p>
-                    <p className="text-[11px] font-mono text-gray-800">Scan & download gambar QRIS</p>
+                    <p className="text-sm font-black font-mono">{t.linksPage.qrisBtnText}</p>
+                    <p className="text-[11px] font-mono text-gray-800">{t.linksPage.qrisSubText}</p>
                   </div>
                 </div>
                 <span className="text-xs font-mono font-black border border-black bg-white px-2.5 py-1 rounded-lg">
-                  Lihat QRIS →
+                  QRIS →
                 </span>
               </button>
             </div>
-          </div>
 
-          {/* Footer */}
-          <footer className="mt-12 text-center text-xs text-gray-500 dark:text-gray-400 font-mono pb-8">
-            <p className="font-bold text-black dark:text-white">
-              Muhammad Dafa Pratama
-            </p>
-            <p className="text-[11px] mt-1">
-              portfolio.daps.my.id · Neobrutalism Edition
-            </p>
-          </footer>
+            {/* Back to main portfolio button */}
+            <div className="w-full pt-4 pb-12">
+              <Link
+                href="/"
+                className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border-2 border-black bg-white dark:bg-[#18181f] text-black dark:text-white font-mono font-black text-sm uppercase shadow-[4px_4px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all text-center"
+              >
+                <span>{t.linksPage.btnWebsite}</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </main>
     </>

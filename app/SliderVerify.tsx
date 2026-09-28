@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useLanguage } from "./LanguageContext";
 
 interface SliderVerifyProps {
   onVerified: () => void;
@@ -91,15 +92,16 @@ export default function SliderVerify({ onVerified }: SliderVerifyProps) {
 
   const maxDist = getMaxDist();
   const progressPct = maxDist > 0 ? (dragX / maxDist) * 100 : 0;
+  const { t } = useLanguage();
 
   return (
     <div className="select-none touch-none">
       <p className="text-xs font-mono font-bold uppercase tracking-wider mb-2 text-center text-[var(--text-main)]">
         {verified
-          ? "✓ Terverifikasi!"
+          ? t.contact.sliderVerified
           : failed
-          ? "! Geser sampai ujung kanan"
-          : "Geser ke kanan untuk verifikasi"}
+          ? t.contact.sliderFailed
+          : t.contact.sliderIdle}
       </p>
 
       <div
@@ -137,7 +139,7 @@ export default function SliderVerify({ onVerified }: SliderVerifyProps) {
               progressPct > 35 ? "opacity-0" : "opacity-75 text-black"
             }`}
           >
-            Geser ke kanan →
+            {t.contact.sliderHint}
           </span>
         </div>
 

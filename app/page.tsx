@@ -6,6 +6,7 @@ import Navbar from "./Navbar";
 import LoadingScreen from "./LoadingScreen";
 import ContactSection from "./ContactSection";
 import BirthdayCountdown from "./BirthdayCountdown";
+import { useLanguage } from "./LanguageContext";
 import {
   InstagramIcon,
   TikTokIcon,
@@ -36,79 +37,6 @@ interface Skill {
   icon: React.ReactNode;
   color: string;
 }
-
-// ─── Data ─────────────────────────────────────────────────────────────────────
-const skills: Skill[] = [
-  {
-    name: "Microsoft Excel",
-    level: 73,
-    icon: <ExcelIcon className="w-6 h-6 text-black" />,
-    color: "#00ff66",
-  },
-  {
-    name: "Microsoft Word",
-    level: 88,
-    icon: <WordIcon className="w-6 h-6 text-black" />,
-    color: "#00f0ff",
-  },
-  {
-    name: "Social Media Mgmt",
-    level: 85,
-    icon: <ShareNodesIcon className="w-6 h-6 text-black" />,
-    color: "#ff70a6",
-  },
-];
-
-const stats = [
-  { label: "Status", value: "ONLINE", bg: "#00ff66" },
-  { label: "Kelas", value: "XI AKL", bg: "#FFE135" },
-  { label: "Sekolah", value: "SMK", bg: "#00f0ff" },
-];
-
-const socialLinks = [
-  {
-    icon: <InstagramIcon className="w-5 h-5 text-black" />,
-    label: "Instagram",
-    href: "https://instagram.com/dafaaaaa11111",
-    username: "@dafaaaaa11111",
-    bg: "#ff70a6",
-  },
-  {
-    icon: <TikTokIcon className="w-5 h-5 text-black" />,
-    label: "TikTok",
-    href: "https://tiktok.com/@dafaaaaa11111",
-    username: "@dafaaaaa11111",
-    bg: "#00f0ff",
-  },
-  {
-    icon: <FacebookIcon className="w-5 h-5 text-black" />,
-    label: "Facebook",
-    href: "https://facebook.com/dafaaaaa11111",
-    username: "dafaaaaa11111",
-    bg: "#8338ec",
-  },
-  {
-    icon: <TelegramIcon className="w-5 h-5 text-black" />,
-    label: "Telegram",
-    href: "https://t.me/dafaaaaa11111",
-    username: "@dafaaaaa11111",
-    bg: "#00f0ff",
-  },
-  {
-    icon: <WhatsAppIcon className="w-5 h-5 text-black" />,
-    label: "WhatsApp",
-    href: "https://wa.me/62895393325895",
-    username: "+62 895-393-325-895",
-    bg: "#00ff66",
-  },
-  {
-    icon: <BroadcastIcon className="w-5 h-5 text-black" />,
-    label: "WA Channel",
-    href: "https://whatsapp.com/channel/0029Vb89x3U5fM5VSAMCHQ16",
-    username: "Channel Dafa",
-    bg: "#FFE135",
-  },
-];
 
 // ─── SkillBar ─────────────────────────────────────────────────────────────────
 function SkillBar({ skill }: { skill: Skill }) {
@@ -177,6 +105,8 @@ function FadeSection({
 
 // ─── QRIS Modal ───────────────────────────────────────────────────────────────
 function QrisModal({ onClose }: { onClose: () => void }) {
+  const { t } = useLanguage();
+
   const handleDownload = () => {
     const a = document.createElement("a");
     a.href = "/qris.jpeg";
@@ -200,10 +130,10 @@ function QrisModal({ onClose }: { onClose: () => void }) {
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[#ff5555] text-white border-2 border-black font-mono font-bold text-xs shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
           >
             <ArrowLeftIcon className="w-3.5 h-3.5" />
-            Tutup
+            {t.payment.modalClose}
           </button>
           <span className="font-mono text-xs font-black uppercase tracking-wider text-[var(--text-main)]">
-            QRIS PAYMENT
+            {t.payment.modalBadge}
           </span>
         </div>
 
@@ -219,7 +149,7 @@ function QrisModal({ onClose }: { onClose: () => void }) {
 
         {/* Info */}
         <p className="text-xs font-mono font-bold text-center text-[var(--text-main)]">
-          Muhammad Dafa Pratama · Dana / Gopay / OVO / ShopeePay / Bank
+          {t.payment.modalInfo}
         </p>
 
         {/* Download button */}
@@ -228,7 +158,7 @@ function QrisModal({ onClose }: { onClose: () => void }) {
           className="w-full flex items-center justify-center gap-2 py-3 bg-[#00ff66] text-black border-2 border-black font-mono font-black text-sm uppercase shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
         >
           <DownloadIcon className="w-4 h-4" />
-          <span>Download Gambar QRIS</span>
+          <span>{t.payment.modalDownload}</span>
         </button>
       </div>
     </div>
@@ -239,6 +169,7 @@ function QrisModal({ onClose }: { onClose: () => void }) {
 function PaymentSection() {
   const [showQris, setShowQris] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const { t } = useLanguage();
 
   const handleCopy = (num: string) => {
     navigator.clipboard.writeText(num);
@@ -254,19 +185,19 @@ function PaymentSection() {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-10">
             <div className="inline-block px-3 py-1 bg-[#8338ec] text-white border-2 border-black shadow-[2px_2px_0px_#000] font-mono text-xs font-black uppercase mb-3">
-              05. Support &amp; Donasi
+              {t.payment.badge}
             </div>
             <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[var(--text-main)] mb-3">
-              Dukung{" "}
+              {t.payment.titlePre}{" "}
               <span
                 style={{ backgroundColor: "var(--accent-primary)" }}
                 className="px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]"
               >
-                Aku
+                {t.payment.titlePost}
               </span>
             </h2>
             <p className="text-sm font-mono opacity-80 text-[var(--text-main)]">
-              Dukungan atau donasi dapat disalurkan melalui nomor e-wallet atau scan QRIS di bawah:
+              {t.payment.desc}
             </p>
           </div>
 
@@ -306,18 +237,18 @@ function PaymentSection() {
                   </span>
                   <button
                     onClick={() => handleCopy(p.number)}
-                    title="Salin nomor"
+                    title={t.payment.copyBtn}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00ff66] text-black border-2 border-black text-xs font-mono font-black uppercase shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                   >
                     {copied === p.number ? (
                       <>
                         <CheckIcon className="w-3.5 h-3.5 stroke-[3]" />
-                        <span>Disalin</span>
+                        <span>{t.payment.copiedBtn}</span>
                       </>
                     ) : (
                       <>
                         <CopyIcon className="w-3.5 h-3.5 stroke-[2.5]" />
-                        <span>Salin</span>
+                        <span>{t.payment.copyBtn}</span>
                       </>
                     )}
                   </button>
@@ -337,11 +268,11 @@ function PaymentSection() {
               <SaweriaIcon className="w-7 h-7" />
             </div>
             <div className="flex-1 text-left">
-              <p className="font-mono font-black text-sm uppercase">Saweria Tip &amp; Donasi</p>
+              <p className="font-mono font-black text-sm uppercase">{t.payment.saweriaTitle}</p>
               <p className="text-xs font-mono font-bold opacity-80">saweria.co/dafaaaaa1111</p>
             </div>
             <span className="px-3 py-1.5 bg-black text-white border-2 border-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000]">
-              Buka →
+              {t.payment.saweriaOpen}
             </span>
           </a>
 
@@ -357,10 +288,10 @@ function PaymentSection() {
                 </div>
                 <div>
                   <p className="font-mono font-black text-sm uppercase text-[var(--text-main)]">
-                    Scan Pembayaran QRIS
+                    {t.payment.qrisTitle}
                   </p>
                   <p className="text-xs font-mono opacity-70 text-[var(--text-main)]">
-                    Klik untuk membuka QRIS fullscreen
+                    {t.payment.qrisSub}
                   </p>
                 </div>
               </div>
@@ -378,7 +309,7 @@ function PaymentSection() {
 
             <div className="mt-4 pt-3 border-t-2 border-black flex items-center justify-center gap-2 bg-[#00f0ff] py-2 border-2 border-black text-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000]">
               <QrCodeIcon className="w-4 h-4" />
-              <span>Lihat QRIS Fullscreen</span>
+              <span>{t.payment.qrisBtn}</span>
             </div>
           </button>
         </div>
@@ -390,22 +321,59 @@ function PaymentSection() {
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function Home() {
   const [activeSection, setActiveSection] = useState("home");
-  const [typedText, setTypedText] = useState("");
-  const fullText = "Muhammad Dafa Pratama";
+  const { t, lang } = useLanguage();
 
-  // Typing effect
+  // Dynamic Looping Typewriter for Hero
+  // Cycle 1: Hai, Saya -> Muhammad Dafa Pratama -> jeda -> hapus
+  // Cycle 2: Tanggal Lahir -> 28 Agustus 2009 -> jeda -> hapus -> repeats!
+  const slides = [
+    { prefix: t.hero.prefix1, text: t.hero.text1 },
+    { prefix: t.hero.prefix2, text: t.hero.text2 },
+  ];
+
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [typedText, setTypedText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Reset or adjust if language changes
   useEffect(() => {
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i <= fullText.length) {
-        setTypedText(fullText.slice(0, i));
-        i++;
+    setTypedText("");
+    setIsDeleting(false);
+  }, [lang]);
+
+  useEffect(() => {
+    const currentItem = slides[slideIndex % slides.length];
+    const full = currentItem.text;
+
+    let timer: NodeJS.Timeout;
+
+    if (!isDeleting) {
+      if (typedText.length < full.length) {
+        timer = setTimeout(() => {
+          setTypedText(full.slice(0, typedText.length + 1));
+        }, 75);
       } else {
-        clearInterval(interval);
+        // Finished typing full word, pause 2 seconds then delete
+        timer = setTimeout(() => {
+          setIsDeleting(true);
+        }, 2000);
       }
-    }, 80);
-    return () => clearInterval(interval);
-  }, []);
+    } else {
+      if (typedText.length > 0) {
+        timer = setTimeout(() => {
+          setTypedText(full.slice(0, typedText.length - 1));
+        }, 40);
+      } else {
+        // Finished deleting, transition to next slide and pause 300ms
+        timer = setTimeout(() => {
+          setIsDeleting(false);
+          setSlideIndex((prev) => (prev + 1) % slides.length);
+        }, 300);
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [typedText, isDeleting, slideIndex, t]);
 
   // Active section tracking
   useEffect(() => {
@@ -425,6 +393,80 @@ export default function Home() {
     return () => observers.forEach((o) => o?.disconnect());
   }, []);
 
+  const currentPrefix = slides[slideIndex % slides.length].prefix;
+
+  const skillsList: Skill[] = [
+    {
+      name: t.skills.skillExcel,
+      level: 73,
+      icon: <ExcelIcon className="w-6 h-6 text-black" />,
+      color: "#00ff66",
+    },
+    {
+      name: t.skills.skillWord,
+      level: 88,
+      icon: <WordIcon className="w-6 h-6 text-black" />,
+      color: "#00f0ff",
+    },
+    {
+      name: t.skills.skillSocial,
+      level: 85,
+      icon: <ShareNodesIcon className="w-6 h-6 text-black" />,
+      color: "#ff70a6",
+    },
+  ];
+
+  const statsList = [
+    { label: t.hero.statusLabel, value: t.hero.statusVal, bg: "#00ff66" },
+    { label: t.hero.classLabel, value: t.hero.classVal, bg: "#FFE135" },
+    { label: t.hero.schoolLabel, value: t.hero.schoolVal, bg: "#00f0ff" },
+  ];
+
+  const socialLinks = [
+    {
+      icon: <InstagramIcon className="w-5 h-5 text-black" />,
+      label: "Instagram",
+      href: "https://instagram.com/dafaaaaa11111",
+      username: "@dafaaaaa11111",
+      bg: "#ff70a6",
+    },
+    {
+      icon: <TikTokIcon className="w-5 h-5 text-black" />,
+      label: "TikTok",
+      href: "https://tiktok.com/@dafaaaaa11111",
+      username: "@dafaaaaa11111",
+      bg: "#00f0ff",
+    },
+    {
+      icon: <FacebookIcon className="w-5 h-5 text-black" />,
+      label: "Facebook",
+      href: "https://facebook.com/dafaaaaa11111",
+      username: "dafaaaaa11111",
+      bg: "#8338ec",
+    },
+    {
+      icon: <TelegramIcon className="w-5 h-5 text-black" />,
+      label: "Telegram",
+      href: "https://t.me/dafaaaaa11111",
+      username: "@dafaaaaa11111",
+      bg: "#00f0ff",
+    },
+    {
+      icon: <WhatsAppIcon className="w-5 h-5 text-black" />,
+      label: "WhatsApp",
+      href: "https://wa.me/62895393325895",
+      username: "+62 895-393-325-895",
+      bg: "#00ff66",
+    },
+    {
+      icon: <BroadcastIcon className="w-5 h-5 text-black" />,
+      label: "WA Channel",
+      href: "https://whatsapp.com/channel/0029Vb89x3U5fM5VSAMCHQ16",
+      username: "Channel Dafa",
+      bg: "#FFE135",
+    },
+  ];
+
   return (
     <>
       <LoadingScreen />
@@ -439,13 +481,13 @@ export default function Home() {
           <div className="max-w-6xl mx-auto w-full grid md:grid-cols-2 gap-10 items-center">
             {/* Left */}
             <div>
-              {/* Name */}
+              {/* Typewriter Header */}
               <div className="mb-4">
-                <p className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-main)] opacity-70 mb-2">
-                  &gt; Halo, Saya
+                <p className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-main)] opacity-70 mb-2 transition-all">
+                  &gt; {currentPrefix}
                 </p>
-                <h1 className="text-3xl sm:text-5xl font-black text-[var(--text-main)] leading-tight uppercase">
-                  {typedText}
+                <h1 className="text-3xl sm:text-5xl font-black text-[var(--text-main)] leading-tight uppercase min-h-[50px] sm:min-h-[64px] flex items-center">
+                  <span>{typedText}</span>
                   <span
                     style={{ backgroundColor: "var(--accent-primary)" }}
                     className="text-black px-1 ml-1 border-2 border-black inline-block animate-pulse"
@@ -458,9 +500,7 @@ export default function Home() {
               {/* Tag line */}
               <div className="bg-[var(--card-bg)] border-2 sm:border-3 border-black p-4 shadow-[4px_4px_0px_#000] mb-6">
                 <p className="text-sm sm:text-base font-mono text-[var(--text-main)] leading-relaxed">
-                  Siswa <span className="bg-[#FFE135] text-black px-1 font-black">SMK Kelas XI</span> jurusan{" "}
-                  <span className="bg-[#00f0ff] text-black px-1 font-black">AKL</span> yang
-                  fokus pada bidang administrasi, pengelolaan media sosial, dan teknologi digital.
+                  {t.hero.tagline}
                 </p>
               </div>
 
@@ -477,7 +517,7 @@ export default function Home() {
                   style={{ backgroundColor: "var(--accent-primary)" }}
                   className="px-5 py-3 text-black font-black font-mono text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
                 >
-                  <span>Kirim Pesan</span>
+                  <span>{t.hero.btnContact}</span>
                   <span>→</span>
                 </a>
                 <a
@@ -487,14 +527,14 @@ export default function Home() {
                   className="px-5 py-3 bg-[#00ff66] text-black font-black font-mono text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
                 >
                   <WhatsAppIcon className="w-4 h-4 text-black" />
-                  <span>WhatsApp</span>
+                  <span>{t.hero.btnWa}</span>
                 </a>
                 <Link
                   href="/links"
                   className="px-5 py-3 bg-[#FFE135] text-black font-black font-mono text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
                 >
                   <LinkIcon className="w-4 h-4 text-black" />
-                  <span>Bio / Linktree</span>
+                  <span>{t.hero.btnBio}</span>
                 </Link>
               </div>
             </div>
@@ -518,7 +558,7 @@ export default function Home() {
                 {/* Floating badge */}
                 <div className="absolute -bottom-3 -right-3 bg-[#00f0ff] border-2 border-black px-3 py-1 shadow-[3px_3px_0px_#000]">
                   <p className="text-xs font-mono text-black font-black">
-                    SMK · XI AKL
+                    {t.hero.badgeSchool}
                   </p>
                 </div>
               </div>
@@ -528,7 +568,7 @@ export default function Home() {
 
               {/* Stats tiles */}
               <div className="grid grid-cols-3 gap-3 w-full max-w-sm">
-                {stats.map((s) => (
+                {statsList.map((s) => (
                   <div
                     key={s.label}
                     className="border-2 border-black p-2.5 text-center shadow-[3px_3px_0px_#000]"
@@ -553,15 +593,15 @@ export default function Home() {
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-10">
                 <div className="inline-block px-3 py-1 bg-[#00f0ff] text-black border-2 border-black shadow-[2px_2px_0px_#000] font-mono text-xs font-black uppercase mb-3">
-                  02. About
+                  {t.about.badge}
                 </div>
                 <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[var(--text-main)]">
-                  Tentang{" "}
+                  {t.about.titlePre}{" "}
                   <span
                     style={{ backgroundColor: "var(--accent-primary)" }}
                     className="px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]"
                   >
-                    Aku
+                    {t.about.titlePost}
                   </span>
                 </h2>
               </div>
@@ -576,36 +616,36 @@ export default function Home() {
                       <span className="w-3 h-3 border border-black bg-[#00ff66] inline-block" />
                     </div>
                     <span className="text-xs font-mono font-black uppercase text-[var(--text-main)]">
-                      profil.json
+                      {t.about.fileName}
                     </span>
                   </div>
                   <div className="font-mono text-xs sm:text-sm space-y-2 text-[var(--text-main)]">
                     <p>
-                      <span className="text-[#ff0055] font-black">&quot;nama&quot;</span>:{" "}
+                      <span className="text-[#ff0055] font-black">&quot;{t.about.keyName}&quot;</span>:{" "}
                       <span className="font-bold">&quot;Muhammad Dafa Pratama&quot;</span>,
                     </p>
                     <p>
-                      <span className="text-[#ff0055] font-black">&quot;sekolah&quot;</span>:{" "}
-                      <span className="font-bold">&quot;SMK Swasta&quot;</span>,
+                      <span className="text-[#ff0055] font-black">&quot;{t.about.keySchool}&quot;</span>:{" "}
+                      <span className="font-bold">&quot;{t.about.valSchool}&quot;</span>,
                     </p>
                     <p>
-                      <span className="text-[#ff0055] font-black">&quot;kelas&quot;</span>:{" "}
-                      <span className="font-bold">&quot;XI (11)&quot;</span>,
+                      <span className="text-[#ff0055] font-black">&quot;{t.about.keyGrade}&quot;</span>:{" "}
+                      <span className="font-bold">&quot;{t.about.valGrade}&quot;</span>,
                     </p>
                     <p>
-                      <span className="text-[#ff0055] font-black">&quot;jurusan&quot;</span>:{" "}
-                      <span className="font-bold">&quot;Akuntansi dan Keuangan Lembaga (AKL)&quot;</span>,
+                      <span className="text-[#ff0055] font-black">&quot;{t.about.keyMajor}&quot;</span>:{" "}
+                      <span className="font-bold">&quot;{t.about.valMajor}&quot;</span>,
                     </p>
                     <p>
-                      <span className="text-[#ff0055] font-black">&quot;status&quot;</span>:{" "}
-                      <span className="font-bold">&quot;Pelajar Aktif&quot;</span>,
+                      <span className="text-[#ff0055] font-black">&quot;{t.about.keyStatus}&quot;</span>:{" "}
+                      <span className="font-bold">&quot;{t.about.valStatus}&quot;</span>,
                     </p>
                     <p>
-                      <span className="text-[#ff0055] font-black">&quot;minat&quot;</span>: [
+                      <span className="text-[#ff0055] font-black">&quot;{t.about.keyInterest}&quot;</span>: [
                     </p>
-                    <p className="pl-4 font-bold">&quot;Administrasi Keuangan&quot;,</p>
-                    <p className="pl-4 font-bold">&quot;Manajemen Media Sosial&quot;,</p>
-                    <p className="pl-4 font-bold">&quot;Teknologi Digital&quot;</p>
+                    <p className="pl-4 font-bold">&quot;{t.about.valInterest1}&quot;,</p>
+                    <p className="pl-4 font-bold">&quot;{t.about.valInterest2}&quot;,</p>
+                    <p className="pl-4 font-bold">&quot;{t.about.valInterest3}&quot;</p>
                     <p>]</p>
                   </div>
                 </div>
@@ -615,20 +655,20 @@ export default function Home() {
                   {[
                     {
                       icon: <GraduationCapIcon className="w-5 h-5 text-black" />,
-                      title: "Pelajar SMK Swasta",
-                      desc: "Menempuh pendidikan di SMK Swasta Kelas XI jurusan Akuntansi Keuangan dan Lembaga (AKL).",
+                      title: t.about.tile1Title,
+                      desc: t.about.tile1Desc,
                       bg: "#00f0ff",
                     },
                     {
                       icon: <AccountingIcon className="w-5 h-5 text-black" />,
-                      title: "Keahlian AKL",
-                      desc: "Menguasai dasar pembukuan, administrasi transaksi, Microsoft Excel, dan Microsoft Word.",
+                      title: t.about.tile2Title,
+                      desc: t.about.tile2Desc,
                       bg: "#00ff66",
                     },
                     {
                       icon: <SparklesIcon className="w-5 h-5 text-black" />,
-                      title: "Digital & Social Media",
-                      desc: "Aktif mengelola media sosial, konten komunitas digital, dan interaksi online.",
+                      title: t.about.tile3Title,
+                      desc: t.about.tile3Desc,
                       bg: "#FFE135",
                     },
                   ].map((item) => (
@@ -658,7 +698,7 @@ export default function Home() {
               {/* Social links grid */}
               <div className="mt-10">
                 <p className="text-xs font-mono font-black uppercase text-center mb-4 text-[var(--text-main)]">
-                  Akun Sosial Media &amp; Komunitas
+                  {t.about.socialTitle}
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {socialLinks.map((s) => (
@@ -695,21 +735,21 @@ export default function Home() {
             <div className="max-w-2xl mx-auto">
               <div className="text-center mb-10">
                 <div className="inline-block px-3 py-1 bg-[#ff70a6] text-black border-2 border-black shadow-[2px_2px_0px_#000] font-mono text-xs font-black uppercase mb-3">
-                  03. Skills
+                  {t.skills.badge}
                 </div>
                 <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[var(--text-main)]">
-                  Keahlian{" "}
+                  {t.skills.titlePre}{" "}
                   <span
                     style={{ backgroundColor: "var(--accent-primary)" }}
                     className="px-2 py-0.5 text-black border-2 border-black shadow-[3px_3px_0px_#000]"
                   >
-                    Ku
+                    {t.skills.titlePost}
                   </span>
                 </h2>
               </div>
 
               <div className="space-y-4">
-                {skills.map((skill) => (
+                {skillsList.map((skill) => (
                   <SkillBar key={skill.name} skill={skill} />
                 ))}
               </div>
@@ -722,10 +762,10 @@ export default function Home() {
                   </div>
                   <div>
                     <p className="font-mono font-black text-sm uppercase text-[var(--text-main)]">
-                      Komunitas &amp; Saluran WhatsApp
+                      {t.skills.waTitle}
                     </p>
                     <p className="text-xs font-mono text-[var(--text-main)] opacity-70">
-                      Grup diskusi dan update seputar aktivitas Dafa
+                      {t.skills.waDesc}
                     </p>
                   </div>
                 </div>
@@ -737,7 +777,7 @@ export default function Home() {
                     className="flex-1 inline-flex items-center justify-center gap-2 py-3 bg-[#00ff66] text-black border-2 border-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                   >
                     <WhatsAppIcon className="w-4 h-4 text-black" />
-                    <span>Gabung Grup WA</span>
+                    <span>{t.skills.joinGroup}</span>
                   </a>
                   <a
                     href="https://whatsapp.com/channel/0029Vb89x3U5fM5VSAMCHQ16"
@@ -746,7 +786,7 @@ export default function Home() {
                     className="flex-1 inline-flex items-center justify-center gap-2 py-3 bg-[#00f0ff] text-black border-2 border-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                   >
                     <BroadcastIcon className="w-4 h-4 text-black" />
-                    <span>Ikuti Saluran WA</span>
+                    <span>{t.skills.followChannel}</span>
                   </a>
                 </div>
               </div>
@@ -767,7 +807,7 @@ export default function Home() {
         {/* ── FOOTER ───────────────────────────────────────────────── */}
         <footer className="py-8 px-4 border-t-2 sm:border-t-3 border-black bg-[var(--card-bg)] text-center">
           <p className="text-xs font-mono font-bold text-[var(--text-main)]">
-            Dibuat oleh{" "}
+            {t.footer.builtBy}{" "}
             <span
               style={{ backgroundColor: "var(--accent-primary)" }}
               className="text-black px-1.5 py-0.5 border border-black font-black"
@@ -781,11 +821,11 @@ export default function Home() {
               href="/links"
               className="text-xs font-mono font-black underline text-[var(--text-main)] hover:text-[#00f0ff]"
             >
-              Halaman Linktree
+              {t.footer.linktree}
             </Link>
             <span className="text-[var(--text-main)]">·</span>
             <span className="text-[10px] font-mono text-[var(--text-main)] opacity-70">
-              SMK XI AKL · Indonesia
+              {t.footer.sub}
             </span>
           </div>
         </footer>
