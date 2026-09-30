@@ -388,13 +388,6 @@ export default function AudioPlayer() {
               );
             })}
           </div>
-
-          {/* Footer note */}
-          <div className="px-3 py-1.5 border-t-2 border-black bg-[var(--bg-main)] text-center">
-            <span className="text-[9px] opacity-60">
-              Kelola & tambah lagu di /admindash
-            </span>
-          </div>
         </div>
       )}
     </>
