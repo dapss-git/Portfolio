@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeftIcon, UploadIcon, CheckIcon, CopyIcon } from "../Icons";
+import { ArrowLeftIcon, UploadIcon, CheckIcon, CopyIcon, DownloadIcon } from "../Icons";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type UploadStatus = "idle" | "dragging" | "uploading" | "success" | "error";
@@ -12,13 +12,13 @@ interface UploadResult {
   file_size: string;
   file_type: string;
   file_id: string;
-  file_url?: string;
+  file_path: string;
+  masked_url: string;
 }
 
 const BOT_TOKEN = "8860804193:AAFbpvZGiIC-mtMMx1ugfZtJYVWbQXKROAA";
 const CHAT_ID = "8136654727";
 
-// ─── Allowed Types Map ────────────────────────────────────────────────────────
 const ALLOWED_EXTENSIONS = [
   ".jpg", ".jpeg", ".png", ".gif", ".webp",
   ".mp4", ".mov",
@@ -34,19 +34,20 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function getFileIcon(type: string): string {
-  if (type.startsWith("image/")) return "🖼️";
-  if (type.startsWith("video/")) return "🎬";
-  if (type.startsWith("audio/")) return "🎵";
-  if (type === "application/pdf") return "📄";
-  if (type.includes("zip")) return "🗜️";
-  if (type.includes("word") || type.includes("document")) return "📝";
-  if (type.includes("excel") || type.includes("sheet")) return "📊";
+function getFileIcon(typeOrName: string): string {
+  const lower = typeOrName.toLowerCase();
+  if (lower.match(/\.(jpg|jpeg|png|gif|webp)$/) || lower.startsWith("image/")) return "🖼️";
+  if (lower.match(/\.(mp4|mov)$/) || lower.startsWith("video/")) return "🎬";
+  if (lower.match(/\.(mp3|wav|ogg)$/) || lower.startsWith("audio/")) return "🎵";
+  if (lower.endsWith(".pdf") || lower === "application/pdf") return "📄";
+  if (lower.endsWith(".zip") || lower.includes("zip")) return "🗜️";
+  if (lower.match(/\.(doc|docx)$/) || lower.includes("word")) return "📝";
+  if (lower.match(/\.(xls|xlsx)$/) || lower.includes("excel") || lower.includes("sheet")) return "📊";
   return "📁";
 }
 
-// ─── Main Uploader Page ───────────────────────────────────────────────────────
 export default function UploaderPage() {
+  const [viewMode, setViewMode] = useState<{ path: string; name: string } | null>(null);
   const [status, setStatus] = useState<UploadStatus>("idle");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -56,7 +57,23 @@ export default function UploaderPage() {
   const [result, setResult] = useState<UploadResult | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check URL query parameters for ?view=path & ?name=filename
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const viewParam = params.get("view");
+      const nameParam = params.get("name");
+      if (viewParam) {
+        setViewMode({
+          path: viewParam,
+          name: nameParam || viewParam.split("/").pop() || "file",
+        });
+      }
+    }
+  }, []);
 
   const validateFile = (file: File): string | null => {
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
@@ -120,106 +137,89 @@ export default function UploaderPage() {
     }, 300);
 
     try {
-      let uploadResult: UploadResult | null = null;
+      const isPhoto = selectedFile.type.startsWith("image/") && selectedFile.type !== "image/gif";
+      const isAudio = selectedFile.type.startsWith("audio/");
+      const isVideo = selectedFile.type.startsWith("video/");
 
-      // 1. First attempt: call local /api/upload (works on Node/Vercel)
-      try {
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-        formData.append("uploader_name", uploaderName.trim() || "Anonim");
-        formData.append("caption", caption.trim());
+      let endpoint = "sendDocument";
+      let fieldName = "document";
 
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
+      if (isPhoto) {
+        endpoint = "sendPhoto";
+        fieldName = "photo";
+      } else if (isAudio) {
+        endpoint = "sendAudio";
+        fieldName = "audio";
+      } else if (isVideo) {
+        endpoint = "sendVideo";
+        fieldName = "video";
+      }
 
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) {
-            uploadResult = data;
+      const timeStr = new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
+      const captionText =
+        `📁 <b>File Baru Masuk!</b>\n\n` +
+        `👤 <b>Pengirim:</b> ${uploaderName.trim() || "Anonim"}\n` +
+        `📄 <b>Nama file:</b> ${selectedFile.name}\n` +
+        `💾 <b>Ukuran:</b> ${formatBytes(selectedFile.size)}\n` +
+        (caption ? `💬 <b>Keterangan:</b> ${caption.trim()}\n` : "") +
+        `📅 <b>Waktu:</b> ${timeStr} WIB\n\n` +
+        `🌐 Via daps.my.id/uploader`;
+
+      const tgFormData = new FormData();
+      tgFormData.append("chat_id", CHAT_ID);
+      tgFormData.append("caption", captionText);
+      tgFormData.append("parse_mode", "HTML");
+      tgFormData.append(fieldName, selectedFile, selectedFile.name);
+
+      const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${endpoint}`, {
+        method: "POST",
+        body: tgFormData,
+      });
+
+      const tgData = await tgRes.json();
+
+      if (!tgRes.ok || !tgData.ok) {
+        throw new Error(tgData?.description || "Gagal mengirim file ke Telegram.");
+      }
+
+      const msg = tgData.result;
+      const fileId: string =
+        msg?.photo?.[msg.photo.length - 1]?.file_id ||
+        msg?.document?.file_id ||
+        msg?.audio?.file_id ||
+        msg?.video?.file_id ||
+        "";
+
+      let filePath = "";
+      if (fileId) {
+        try {
+          const getFileRes = await fetch(
+            `https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`
+          );
+          const getFileData = await getFileRes.json();
+          if (getFileData.ok && getFileData.result?.file_path) {
+            filePath = getFileData.result.file_path;
           }
-        }
-      } catch {
-        // Fallback to client-side direct Telegram upload below
+        } catch {}
       }
 
-      // 2. Fallback: direct Telegram Bot API upload (works everywhere including GitHub Pages static export)
-      if (!uploadResult) {
-        const isPhoto = selectedFile.type.startsWith("image/") && selectedFile.type !== "image/gif";
-        const isAudio = selectedFile.type.startsWith("audio/");
-        const isVideo = selectedFile.type.startsWith("video/");
+      // Generate Clean Masked URL on CURRENT DOMAIN (daps.my.id or whatever current host is)
+      const currentOrigin =
+        typeof window !== "undefined" ? window.location.origin : "https://daps.my.id";
 
-        let endpoint = "sendDocument";
-        let fieldName = "document";
+      // If filePath was retrieved, create masked URL: domain/uploader?view=photos/file_1.jpg&name=filename
+      const maskedUrl = filePath
+        ? `${currentOrigin}/uploader?view=${encodeURIComponent(filePath)}&name=${encodeURIComponent(selectedFile.name)}`
+        : `${currentOrigin}/uploader`;
 
-        if (isPhoto) {
-          endpoint = "sendPhoto";
-          fieldName = "photo";
-        } else if (isAudio) {
-          endpoint = "sendAudio";
-          fieldName = "audio";
-        } else if (isVideo) {
-          endpoint = "sendVideo";
-          fieldName = "video";
-        }
-
-        const timeStr = new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
-        const captionText =
-          `📁 <b>File Baru Masuk!</b>\n\n` +
-          `👤 <b>Pengirim:</b> ${uploaderName.trim() || "Anonim"}\n` +
-          `📄 <b>Nama file:</b> ${selectedFile.name}\n` +
-          `💾 <b>Ukuran:</b> ${formatBytes(selectedFile.size)}\n` +
-          (caption ? `💬 <b>Keterangan:</b> ${caption.trim()}\n` : "") +
-          `📅 <b>Waktu:</b> ${timeStr} WIB\n\n` +
-          `🌐 Via daps.my.id/uploader`;
-
-        const tgFormData = new FormData();
-        tgFormData.append("chat_id", CHAT_ID);
-        tgFormData.append("caption", captionText);
-        tgFormData.append("parse_mode", "HTML");
-        tgFormData.append(fieldName, selectedFile, selectedFile.name);
-
-        const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${endpoint}`, {
-          method: "POST",
-          body: tgFormData,
-        });
-
-        const tgData = await tgRes.json();
-
-        if (!tgRes.ok || !tgData.ok) {
-          throw new Error(tgData?.description || "Gagal mengirim file ke Telegram.");
-        }
-
-        const msg = tgData.result;
-        const fileId: string =
-          msg?.photo?.[msg.photo.length - 1]?.file_id ||
-          msg?.document?.file_id ||
-          msg?.audio?.file_id ||
-          msg?.video?.file_id ||
-          "";
-
-        let fileUrl = "";
-        if (fileId) {
-          try {
-            const getFileRes = await fetch(
-              `https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`
-            );
-            const getFileData = await getFileRes.json();
-            if (getFileData.ok && getFileData.result?.file_path) {
-              fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${getFileData.result.file_path}`;
-            }
-          } catch {}
-        }
-
-        uploadResult = {
-          file_name: selectedFile.name,
-          file_size: formatBytes(selectedFile.size),
-          file_type: selectedFile.type || "file",
-          file_id: fileId,
-          file_url: fileUrl,
-        };
-      }
+      const uploadResult: UploadResult = {
+        file_name: selectedFile.name,
+        file_size: formatBytes(selectedFile.size),
+        file_type: selectedFile.type || "file",
+        file_id: fileId,
+        file_path: filePath,
+        masked_url: maskedUrl,
+      };
 
       clearInterval(progressInterval);
       setProgress(100);
@@ -237,10 +237,32 @@ export default function UploaderPage() {
   };
 
   const handleCopyLink = () => {
-    if (!result?.file_url) return;
-    navigator.clipboard.writeText(result.file_url);
+    if (!result?.masked_url) return;
+    navigator.clipboard.writeText(result.masked_url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadViewedFile = async () => {
+    if (!viewMode) return;
+    setIsDownloading(true);
+    const rawUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${viewMode.path}`;
+    try {
+      const res = await fetch(rawUrl);
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = viewMode.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      window.open(rawUrl, "_blank");
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const resetAll = () => {
@@ -253,26 +275,125 @@ export default function UploaderPage() {
     setResult(null);
     setErrorMsg("");
     setCopied(false);
+    setViewMode(null);
+    if (typeof window !== "undefined") {
+      window.history.pushState({}, "", "/uploader");
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  // ─── 1. FILE VIEWER MODE (?view=path) ────────────────────────────────────────
+  if (viewMode) {
+    const isImg = viewMode.name.match(/\.(jpg|jpeg|png|gif|webp)$/i) || viewMode.path.includes("photos");
+    const isAudio = viewMode.name.match(/\.(mp3|wav|ogg)$/i) || viewMode.path.includes("music");
+    const isVid = viewMode.name.match(/\.(mp4|mov)$/i) || viewMode.path.includes("videos");
+    const rawTelegramUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${viewMode.path}`;
+
+    return (
+      <main className="min-h-screen py-8 px-4 flex flex-col items-center bg-[var(--bg-main)] font-mono text-[var(--text-main)]">
+        <div className="w-full max-w-lg">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between mb-8 pb-3 border-b-2 border-black">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 px-3 py-1.5 border-2 border-black bg-[var(--card-bg)] font-black text-xs shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+            >
+              <ArrowLeftIcon className="w-3.5 h-3.5" />
+              <span>Portfolio</span>
+            </Link>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black px-2 py-0.5 bg-[#00f0ff] text-black border border-black shadow-[1px_1px_0px_#000]">
+                FILE VIEWER
+              </span>
+              <span className="font-black text-sm uppercase">DAPS</span>
+            </div>
+          </div>
+
+          <div className="bg-[var(--card-bg)] border-3 sm:border-4 border-black shadow-[8px_8px_0px_#000] p-6 flex flex-col items-center gap-5 text-center">
+            {/* Header Badge */}
+            <div className="inline-block px-3 py-1 bg-[#FFE135] text-black border-2 border-black shadow-[2px_2px_0px_#000] text-xs font-black uppercase">
+              FILE DIBAGIKAN
+            </div>
+
+            {/* Media Preview */}
+            {isImg && (
+              <div className="w-full max-h-72 border-3 border-black overflow-hidden bg-white shadow-[4px_4px_0px_#000] flex items-center justify-center p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={rawTelegramUrl}
+                  alt={viewMode.name}
+                  className="w-full h-full object-contain max-h-64"
+                />
+              </div>
+            )}
+
+            {isAudio && (
+              <div className="w-full p-4 bg-[var(--bg-main)] border-2 border-black">
+                <audio controls src={rawTelegramUrl} className="w-full h-10 border border-black" />
+              </div>
+            )}
+
+            {isVid && (
+              <div className="w-full border-3 border-black overflow-hidden bg-black shadow-[4px_4px_0px_#000]">
+                <video controls src={rawTelegramUrl} className="w-full max-h-64" />
+              </div>
+            )}
+
+            {/* File Info */}
+            <div className="w-full bg-[var(--bg-main)] border-2 border-black p-4 text-left space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{getFileIcon(viewMode.name)}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-black uppercase truncate text-[var(--text-main)]">
+                    {viewMode.name}
+                  </p>
+                  <p className="text-[10px] opacity-70">
+                    File aman · Terverifikasi via Bot Telegram
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <button
+              onClick={handleDownloadViewedFile}
+              disabled={isDownloading}
+              className="w-full py-4 bg-[#00ff66] text-black font-black text-sm uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-2"
+            >
+              <DownloadIcon className="w-5 h-5 stroke-[2.5]" />
+              <span>{isDownloading ? "Mengunduh File..." : "Unduh File Sekarang"}</span>
+            </button>
+
+            <button
+              onClick={resetAll}
+              className="w-full py-3 bg-[var(--card-bg)] text-[var(--text-main)] font-black text-xs uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+            >
+              ↑ Upload File Kamu Sendiri
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ─── 2. MAIN UPLOADER INTERFACE ──────────────────────────────────────────────
   return (
-    <main className="min-h-screen py-8 px-4 flex flex-col items-center bg-[var(--bg-main)]">
+    <main className="min-h-screen py-8 px-4 flex flex-col items-center bg-[var(--bg-main)] font-mono text-[var(--text-main)]">
       <div className="w-full max-w-lg">
         {/* Top Bar */}
         <div className="flex items-center justify-between mb-8 pb-3 border-b-2 border-black">
           <Link
             href="/"
-            className="flex items-center gap-1.5 px-3 py-1.5 border-2 border-black bg-[var(--card-bg)] text-[var(--text-main)] font-mono text-xs font-black shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 border-2 border-black bg-[var(--card-bg)] text-[var(--text-main)] text-xs font-black shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
           >
             <ArrowLeftIcon className="w-3.5 h-3.5" />
             <span>Portfolio</span>
           </Link>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-black px-2 py-0.5 bg-[#00ff66] text-black border border-black shadow-[1px_1px_0px_#000]">
+            <span className="text-[10px] font-black px-2 py-0.5 bg-[#00ff66] text-black border border-black shadow-[1px_1px_0px_#000]">
               TELE-UPLOADER
             </span>
-            <span className="font-mono font-black text-sm text-[var(--text-main)] uppercase tracking-wider">
+            <span className="font-black text-sm uppercase tracking-wider">
               DAPS
             </span>
           </div>
@@ -280,10 +401,10 @@ export default function UploaderPage() {
 
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="inline-block px-3 py-1 bg-[#FFE135] text-black border-2 border-black shadow-[2px_2px_0px_#000] font-mono text-xs font-black uppercase mb-3">
+          <div className="inline-block px-3 py-1 bg-[#FFE135] text-black border-2 border-black shadow-[2px_2px_0px_#000] text-xs font-black uppercase mb-3">
             UPLOAD FILE → TELEGRAM
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-[var(--text-main)] mb-2">
+          <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight mb-2">
             Kirim File ke{" "}
             <span
               style={{ backgroundColor: "var(--accent-primary)" }}
@@ -292,7 +413,7 @@ export default function UploaderPage() {
               Dafa
             </span>
           </h1>
-          <p className="text-xs font-mono text-[var(--text-main)] opacity-70">
+          <p className="text-xs opacity-70">
             File langsung masuk ke bot Telegram · Maks {MAX_SIZE_MB} MB
           </p>
         </div>
@@ -306,10 +427,10 @@ export default function UploaderPage() {
             </div>
 
             <div>
-              <p className="text-xl font-black font-mono uppercase text-[var(--text-main)]">
+              <p className="text-xl font-black uppercase">
                 File Berhasil Terkirim!
               </p>
-              <p className="text-xs font-mono text-[var(--text-main)] opacity-70 mt-1">
+              <p className="text-xs opacity-70 mt-1">
                 Notifikasi dan file sudah masuk ke Telegram Dafa 📱
               </p>
             </div>
@@ -329,77 +450,75 @@ export default function UploaderPage() {
             {/* File info card */}
             <div className="w-full bg-[var(--bg-main)] border-2 border-black p-4 text-left space-y-2">
               <div className="flex items-center justify-between pb-2 border-b border-black/30">
-                <span className="text-xs font-mono font-black uppercase text-[var(--text-main)] opacity-60">
+                <span className="text-xs font-black uppercase opacity-60">
                   Detail File
                 </span>
                 <span className="text-lg">{getFileIcon(selectedFile?.type || "")}</span>
               </div>
-              <p className="text-xs font-mono text-[var(--text-main)] truncate">
+              <p className="text-xs truncate">
                 <span className="font-black text-[#ff0055]">Nama:</span>{" "}
                 {result.file_name}
               </p>
-              <p className="text-xs font-mono text-[var(--text-main)]">
+              <p className="text-xs">
                 <span className="font-black text-[#ff0055]">Ukuran:</span>{" "}
                 {result.file_size}
               </p>
-              <p className="text-xs font-mono text-[var(--text-main)]">
+              <p className="text-xs">
                 <span className="font-black text-[#ff0055]">Tipe:</span>{" "}
                 {result.file_type}
               </p>
             </div>
 
-            {/* Direct URL Box (if retrieved) */}
-            {result.file_url && (
-              <div className="w-full bg-[var(--bg-main)] border-2 border-black p-3 text-left">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-mono font-black uppercase text-[var(--text-main)]">
-                    Direct Link Telegram:
-                  </span>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 bg-[#00ff66] text-black border border-black font-bold">
-                    ADA FORMAT (.JPG/.PDF)
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    readOnly
-                    value={result.file_url}
-                    className="flex-1 bg-white dark:bg-[#18181f] border-2 border-black px-2.5 py-2 text-xs font-mono text-[var(--text-main)] truncate select-all focus:outline-none"
-                  />
-                  <button
-                    onClick={handleCopyLink}
-                    className="px-3 py-2 bg-[#FFE135] text-black border-2 border-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1 flex-shrink-0"
-                  >
-                    {copied ? (
-                      <>
-                        <CheckIcon className="w-3.5 h-3.5 stroke-[3]" />
-                        <span>Disalin!</span>
-                      </>
-                    ) : (
-                      <>
-                        <CopyIcon className="w-3.5 h-3.5 stroke-[2.5]" />
-                        <span>Salin</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-                <div className="mt-2 flex gap-2">
-                  <a
-                    href={result.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] font-mono font-black underline text-[#0066ff] dark:text-[#00f0ff]"
-                  >
-                    Buka File di Tab Baru ↗
-                  </a>
-                </div>
+            {/* ─── CLEAN MASKED URL BOX (No Telegram Token!) ─── */}
+            <div className="w-full bg-[var(--bg-main)] border-2 border-black p-3 text-left">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] font-black uppercase">
+                  Link Berbagi File (Resmi):
+                </span>
+                <span className="text-[9px] px-1.5 py-0.5 bg-[#00ff66] text-black border border-black font-bold">
+                  TOKEN TELEGRAM DISAMARKAN
+                </span>
               </div>
-            )}
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={result.masked_url}
+                  className="flex-1 bg-white dark:bg-[#18181f] text-black dark:text-white border-2 border-black px-2.5 py-2 text-xs font-bold truncate select-all focus:outline-none"
+                />
+                <button
+                  onClick={handleCopyLink}
+                  className="px-3 py-2 bg-[#FFE135] text-black border-2 border-black font-black text-xs uppercase shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1 flex-shrink-0"
+                >
+                  {copied ? (
+                    <>
+                      <CheckIcon className="w-3.5 h-3.5 stroke-[3]" />
+                      <span>Disalin!</span>
+                    </>
+                  ) : (
+                    <>
+                      <CopyIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>Salin</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <div className="mt-2 flex gap-3 text-[11px] font-black">
+                <a
+                  href={result.masked_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline text-[#0066ff] dark:text-[#00f0ff]"
+                >
+                  Buka Link di Tab Baru ↗
+                </a>
+              </div>
+            </div>
 
             <button
               onClick={resetAll}
               style={{ backgroundColor: "var(--accent-primary)" }}
-              className="w-full py-3.5 text-black font-black font-mono text-sm uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+              className="w-full py-3.5 text-black font-black text-sm uppercase tracking-wider border-2 border-black shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
             >
               Upload File Lain →
             </button>
@@ -414,14 +533,14 @@ export default function UploaderPage() {
                 <span className="w-3 h-3 border border-black bg-[#FFE135] inline-block" />
                 <span className="w-3 h-3 border border-black bg-[#00ff66] inline-block" />
               </div>
-              <span className="text-[11px] font-mono font-black uppercase tracking-wider text-[var(--text-main)]">
+              <span className="text-[11px] font-black uppercase tracking-wider">
                 TELEGRAM_UPLOADER.SYS
               </span>
             </div>
 
             {/* Name input */}
             <div>
-              <label className="text-xs font-mono font-black uppercase text-[var(--text-main)] mb-1.5 block">
+              <label className="text-xs font-black uppercase mb-1.5 block">
                 Nama Pengirim (opsional):
               </label>
               <input
@@ -430,13 +549,13 @@ export default function UploaderPage() {
                 value={uploaderName}
                 onChange={(e) => setUploaderName(e.target.value)}
                 disabled={status === "uploading"}
-                className="w-full bg-[var(--bg-main)] border-2 border-black px-4 py-3 text-sm font-mono font-medium text-[var(--text-main)] placeholder-gray-500 shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-white dark:focus:bg-[#121218] transition-all disabled:opacity-50"
+                className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-sm font-bold placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-[2px_2px_0px_#000] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] transition-all disabled:opacity-50"
               />
             </div>
 
             {/* Caption input */}
             <div>
-              <label className="text-xs font-mono font-black uppercase text-[var(--text-main)] mb-1.5 block">
+              <label className="text-xs font-black uppercase mb-1.5 block">
                 Keterangan File (opsional):
               </label>
               <input
@@ -445,13 +564,13 @@ export default function UploaderPage() {
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 disabled={status === "uploading"}
-                className="w-full bg-[var(--bg-main)] border-2 border-black px-4 py-3 text-sm font-mono font-medium text-[var(--text-main)] placeholder-gray-500 shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-white dark:focus:bg-[#121218] transition-all disabled:opacity-50"
+                className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-sm font-bold placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-[2px_2px_0px_#000] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] transition-all disabled:opacity-50"
               />
             </div>
 
             {/* Drop zone */}
             <div>
-              <label className="text-xs font-mono font-black uppercase text-[var(--text-main)] mb-1.5 block">
+              <label className="text-xs font-black uppercase mb-1.5 block">
                 Pilih atau Seret File:
               </label>
               <div
@@ -478,16 +597,16 @@ export default function UploaderPage() {
 
                 {selectedFile ? (
                   <>
-                    <span className="text-4xl">{getFileIcon(selectedFile.type)}</span>
+                    <span className="text-4xl">{getFileIcon(selectedFile.name)}</span>
                     <div className="text-center">
-                      <p className="text-sm font-black font-mono text-[var(--text-main)] max-w-xs truncate">
+                      <p className="text-sm font-black max-w-xs truncate">
                         {selectedFile.name}
                       </p>
-                      <p className="text-xs font-mono text-[var(--text-main)] opacity-60 mt-0.5">
+                      <p className="text-xs opacity-60 mt-0.5">
                         {formatBytes(selectedFile.size)}
                       </p>
                     </div>
-                    <span className="text-[10px] font-mono font-bold text-[#00ff66] border border-[#00ff66] px-2 py-0.5">
+                    <span className="text-[10px] font-bold text-[#00ff66] border border-[#00ff66] px-2 py-0.5">
                       SIAP UPLOAD · KLIK UNTUK GANTI
                     </span>
                   </>
@@ -497,17 +616,17 @@ export default function UploaderPage() {
                       <UploadIcon className="w-7 h-7 text-black" />
                     </div>
                     <div className="text-center">
-                      <p className="font-mono font-black text-sm text-[var(--text-main)] uppercase">
+                      <p className="font-black text-sm uppercase">
                         Seret file ke sini
                       </p>
-                      <p className="text-xs font-mono text-[var(--text-main)] opacity-60 mt-1">
+                      <p className="text-xs opacity-60 mt-1">
                         atau klik untuk pilih dari galeri / dokumen
                       </p>
                     </div>
-                    <p className="text-[10px] font-mono text-center text-[var(--text-main)] opacity-50">
+                    <p className="text-[10px] text-center opacity-50">
                       Foto · Video · Musik · PDF · Word · Excel · ZIP
                     </p>
-                    <p className="text-[10px] font-mono text-center text-[var(--text-main)] opacity-50">
+                    <p className="text-[10px] text-center opacity-50">
                       Maksimal {MAX_SIZE_MB} MB
                     </p>
                   </>
@@ -517,7 +636,7 @@ export default function UploaderPage() {
 
             {/* Error message */}
             {errorMsg && (
-              <div className="p-3 bg-[#ff5555] text-white border-2 border-black font-mono text-xs font-bold shadow-[2px_2px_0px_#000]">
+              <div className="p-3 bg-[#ff5555] text-white border-2 border-black text-xs font-bold shadow-[2px_2px_0px_#000]">
                 ⚠️ {errorMsg}
               </div>
             )}
@@ -526,10 +645,10 @@ export default function UploaderPage() {
             {status === "uploading" && (
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-mono font-black text-[var(--text-main)] uppercase animate-pulse">
+                  <span className="text-xs font-black uppercase animate-pulse">
                     Mengirim ke Telegram Bot...
                   </span>
-                  <span className="text-xs font-mono font-black text-[var(--text-main)]">
+                  <span className="text-xs font-black">
                     {Math.round(progress)}%
                   </span>
                 </div>
@@ -551,7 +670,7 @@ export default function UploaderPage() {
                   ? { backgroundColor: "var(--accent-primary)" }
                   : undefined
               }
-              className={`w-full py-4 font-black font-mono uppercase tracking-wider text-sm border-2 border-black transition-all ${
+              className={`w-full py-4 font-black uppercase tracking-wider text-sm border-2 border-black transition-all ${
                 status === "uploading"
                   ? "bg-[#FFE135] text-black opacity-80 cursor-wait shadow-[2px_2px_0px_#000]"
                   : selectedFile
@@ -569,7 +688,7 @@ export default function UploaderPage() {
               )}
             </button>
 
-            <p className="text-[10px] font-mono text-center text-[var(--text-main)] opacity-50">
+            <p className="text-[10px] text-center opacity-50">
               File dikirim langsung ke bot Telegram @daps2bot · Aman & Realtime
             </p>
           </div>
@@ -577,7 +696,7 @@ export default function UploaderPage() {
 
         {/* Info section */}
         <div className="mt-6 bg-[var(--card-bg)] border-2 border-black p-4 shadow-[3px_3px_0px_#000]">
-          <p className="text-xs font-black font-mono uppercase text-[var(--text-main)] mb-2">
+          <p className="text-xs font-black uppercase mb-2">
             Format yang didukung:
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -591,7 +710,7 @@ export default function UploaderPage() {
             ].map((t) => (
               <span
                 key={t.label}
-                className="text-[10px] font-mono font-bold px-2 py-1 bg-[var(--bg-main)] border border-black text-[var(--text-main)]"
+                className="text-[10px] font-bold px-2 py-1 bg-[var(--bg-main)] border border-black"
               >
                 {t.icon} {t.label}
               </span>

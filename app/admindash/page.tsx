@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useSiteConfig, DEFAULT_CONFIG, SiteConfig } from "../ConfigContext";
+import { useSiteConfig, DEFAULT_CONFIG, SiteConfig, Song } from "../ConfigContext";
 import {
   CheckIcon,
   CopyIcon,
@@ -26,7 +26,18 @@ export default function AdminDashPage() {
   const [savedToast, setSavedToast] = useState(false);
   const [copiedJson, setCopiedJson] = useState(false);
   const [qrisPreview, setQrisPreview] = useState<string>("/qris.jpeg");
+
+  // New Song Inputs
+  const [newSongTitle, setNewSongTitle] = useState("");
+  const [newSongArtist, setNewSongArtist] = useState("");
+  const [newSongUrl, setNewSongUrl] = useState("");
+  const [newSongThumb, setNewSongThumb] = useState("");
+  const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+
+  // File input refs
   const qrisFileInputRef = useRef<HTMLInputElement>(null);
+  const cdThumbFileInputRef = useRef<HTMLInputElement>(null);
+  const audioFileInputRef = useRef<HTMLInputElement>(null);
 
   // Sync form when config is loaded
   useEffect(() => {
@@ -84,7 +95,103 @@ export default function AdminDashPage() {
     setTimeout(() => setCopiedJson(false), 2000);
   };
 
-  // Handle uploading new QRIS image
+  // ─── PLAYLIST HANDLERS ──────────────────────────────────────────────────────
+  const handleAddSong = () => {
+    if (!newSongTitle.trim() || !newSongUrl.trim()) {
+      alert("Harap masukkan Judul Lagu dan Link Audio (.mp3)!");
+      return;
+    }
+    const newSong: Song = {
+      id: Date.now().toString(),
+      title: newSongTitle.trim(),
+      artist: newSongArtist.trim() || "Muhammad Dafa Pratama",
+      url: newSongUrl.trim(),
+      thumbnail: newSongThumb.trim() || form.cdCustomThumbnail || "/hero-banner.jpg",
+    };
+    setForm((prev) => ({
+      ...prev,
+      playlist: [...(prev.playlist || []), newSong],
+    }));
+    setNewSongTitle("");
+    setNewSongArtist("");
+    setNewSongUrl("");
+    setNewSongThumb("");
+  };
+
+  const handleDeleteSong = (indexToDelete: number) => {
+    if (form.playlist.length <= 1) {
+      alert("Minimal harus ada 1 lagu di dalam playlist.");
+      return;
+    }
+    if (window.confirm(`Hapus lagu "${form.playlist[indexToDelete]?.title}" dari playlist?`)) {
+      setForm((prev) => {
+        const updated = prev.playlist.filter((_, i) => i !== indexToDelete);
+        return {
+          ...prev,
+          playlist: updated,
+          activeSongIndex: Math.min(prev.activeSongIndex, Math.max(0, updated.length - 1)),
+        };
+      });
+    }
+  };
+
+  const handleUploadAudioFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingAudio(true);
+    try {
+      const BOT_TOKEN = "8860804193:AAFbpvZGiIC-mtMMx1ugfZtJYVWbQXKROAA";
+      const CHAT_ID = "8136654727";
+      const tgFormData = new FormData();
+      tgFormData.append("chat_id", CHAT_ID);
+      tgFormData.append("caption", `🎵 Upload Lagu Playlist: ${file.name}`);
+      tgFormData.append("document", file, file.name);
+
+      const tgRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, {
+        method: "POST",
+        body: tgFormData,
+      });
+      const tgData = await tgRes.json();
+      if (tgData.ok && tgData.result?.document?.file_id) {
+        const fileId = tgData.result.document.file_id;
+        const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
+        const fileJson = await fileRes.json();
+        if (fileJson.ok && fileJson.result?.file_path) {
+          const directUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileJson.result.file_path}`;
+          setNewSongUrl(directUrl);
+          if (!newSongTitle) setNewSongTitle(file.name.replace(/\.[^/.]+$/, ""));
+        }
+      } else {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          setNewSongUrl(ev.target?.result as string);
+          if (!newSongTitle) setNewSongTitle(file.name.replace(/\.[^/.]+$/, ""));
+        };
+        reader.readAsDataURL(file);
+      }
+    } catch {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setNewSongUrl(ev.target?.result as string);
+        if (!newSongTitle) setNewSongTitle(file.name.replace(/\.[^/.]+$/, ""));
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsUploadingAudio(false);
+    }
+  };
+
+  const handleCdThumbFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      setForm((prev) => ({ ...prev, cdCustomThumbnail: dataUrl }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleQrisFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -108,7 +215,6 @@ export default function AdminDashPage() {
     return (
       <main className="min-h-screen bg-[#121216] flex items-center justify-center p-4 font-mono text-white select-none">
         <div className="w-full max-w-sm bg-[#1c1c24] border-3 border-black p-6 sm:p-8 shadow-[8px_8px_0px_#000]">
-          {/* Header Terminal */}
           <div className="flex items-center justify-between pb-4 mb-6 border-b-2 border-black">
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 bg-[#ff5555] border border-black inline-block" />
@@ -177,9 +283,10 @@ export default function AdminDashPage() {
   }
 
   // ─── AUTHENTICATED DASHBOARD ────────────────────────────────────────────────
+  const playlist = form.playlist || [];
+
   return (
     <main className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] py-8 px-4 font-mono">
-      {/* Toast Notification */}
       {savedToast && (
         <div className="fixed top-5 right-5 z-[9999] px-5 py-3 bg-[#00ff66] text-black border-3 border-black font-black text-xs uppercase shadow-[4px_4px_0px_#000] flex items-center gap-2 animate-fade-up">
           <CheckIcon className="w-4 h-4 stroke-[3]" />
@@ -219,7 +326,7 @@ export default function AdminDashPage() {
         {/* Tab Navigation */}
         <div className="flex flex-wrap gap-2 mb-6">
           {[
-            { id: "music", label: "🎵 Musik Player", bg: "#FFE135" },
+            { id: "music", label: "🎵 Musik & Playlist", bg: "#FFE135" },
             { id: "qris", label: "💳 QRIS & Donasi", bg: "#00ff66" },
             { id: "social", label: "📱 Kontak & Medsos", bg: "#00f0ff" },
             { id: "display", label: "🎨 Background & Desain", bg: "#ff70a6" },
@@ -245,16 +352,16 @@ export default function AdminDashPage() {
 
         {/* ─── TAB CONTENT ───────────────────────────────────────────────── */}
         <div className="bg-[var(--card-bg)] border-3 border-black p-6 sm:p-8 shadow-[6px_6px_0px_#000] mb-6">
-          {/* 1. MUSIC PLAYER SETTINGS */}
+          {/* 1. MUSIC & PLAYLIST SETTINGS */}
           {activeTab === "music" && (
             <div className="space-y-6">
               <div className="pb-3 border-b-2 border-black flex items-center justify-between">
                 <div>
-                  <h2 className="text-base font-black uppercase text-[var(--text-main)]">
-                    Pengaturan Pemutar Musik (Audio Player)
+                  <h2 className="text-base font-black uppercase">
+                    Pengaturan Pemutar Musik & Playlist
                   </h2>
                   <p className="text-xs opacity-70 mt-0.5">
-                    Atur lagu MP3, judul, dan status pemutar musik CD berputar di pojok web
+                    Tampilan CD di pojok web: klik CD untuk buka kotak daftar lagu
                   </p>
                 </div>
                 <MusicIcon className="w-6 h-6 text-[#FFE135]" />
@@ -263,11 +370,11 @@ export default function AdminDashPage() {
               {/* Toggle Enable/Disable */}
               <div className="p-4 bg-[var(--bg-main)] border-2 border-black flex items-center justify-between">
                 <div>
-                  <p className="font-black text-xs uppercase">Tampilkan Audio Player:</p>
+                  <p className="font-black text-xs uppercase">Tampilkan Pemutar Musik CD:</p>
                   <p className="text-[11px] opacity-70">
                     {form.musicEnabled
-                      ? "Player AKTIF dan muncul di pojok kanan bawah"
-                      : "Player NONAKTIF dan disembunyikan"}
+                      ? "Piringan CD AKTIF dan berputar di pojok kanan bawah"
+                      : "Piringan CD NONAKTIF (disembunyikan)"}
                   </p>
                 </div>
                 <button
@@ -283,52 +390,196 @@ export default function AdminDashPage() {
                 </button>
               </div>
 
-              {/* Music URL */}
+              {/* Custom CD Center Thumbnail */}
+              <div className="p-4 bg-[var(--bg-main)] border-2 border-black space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-black text-xs uppercase">Gambar Tengah Piringan CD:</p>
+                    <p className="text-[11px] opacity-70">
+                      Gambar bulat yang terlihat di tengah CD saat berputar di pojok web
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 rounded-full border-2 border-black overflow-hidden flex-shrink-0 bg-white shadow-[2px_2px_0px_#000]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={form.cdCustomThumbnail || "/hero-banner.jpg"}
+                      alt="CD Art"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    ref={cdThumbFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCdThumbFile}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => cdThumbFileInputRef.current?.click()}
+                    className="px-4 py-2 bg-[#FFE135] text-black border-2 border-black font-black text-xs uppercase shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none flex items-center justify-center gap-1.5"
+                  >
+                    <UploadIcon className="w-3.5 h-3.5" />
+                    <span>Upload Foto CD</span>
+                  </button>
+                  <input
+                    type="text"
+                    value={form.cdCustomThumbnail || ""}
+                    onChange={(e) => setForm((prev) => ({ ...prev, cdCustomThumbnail: e.target.value }))}
+                    placeholder="URL gambar: /hero-banner.jpg atau https://..."
+                    className="flex-1 bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-3 py-2 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff]"
+                  />
+                </div>
+              </div>
+
+              {/* ─── CURRENT PLAYLIST LIST ─── */}
               <div>
-                <label className="text-xs font-black uppercase mb-1.5 block">
-                  Link File Audio (.mp3 / link langsung):
-                </label>
-                <input
-                  type="text"
-                  value={form.musicUrl}
-                  onChange={(e) => setForm((prev) => ({ ...prev, musicUrl: e.target.value }))}
-                  placeholder="https://.../lagu.mp3"
-                  className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-black uppercase">
+                    Daftar Lagu Aktif ({playlist.length} Lagu):
+                  </h3>
+                  <span className="text-[10px] opacity-60">
+                    Pengunjung bisa memilih lagu ini di web
+                  </span>
+                </div>
+
+                <div className="border-2 border-black divide-y-2 divide-black bg-[var(--bg-main)]">
+                  {playlist.map((song, i) => (
+                    <div
+                      key={song.id || i}
+                      className="p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[var(--card-bg)]"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <span className="w-5 text-xs font-black text-[#ff0055]">
+                          {i + 1}.
+                        </span>
+                        <div className="w-9 h-9 rounded-full border-2 border-black overflow-hidden flex-shrink-0 bg-white">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={song.thumbnail || form.cdCustomThumbnail || "/hero-banner.jpg"}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-black uppercase truncate">{song.title}</p>
+                          <p className="text-[10px] opacity-70 truncate">{song.artist}</p>
+                          <p className="text-[9px] text-[#0066ff] dark:text-[#00f0ff] truncate max-w-xs opacity-75">
+                            {song.url}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                        <audio controls src={song.url} className="h-8 max-w-[150px] border border-black" />
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSong(i)}
+                          className="px-3 py-1.5 bg-[#ff5555] text-white border-2 border-black font-black text-xs uppercase shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex-shrink-0"
+                          title="Hapus lagu ini"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Music Title & Artist */}
-              <div className="grid sm:grid-cols-2 gap-4">
+              {/* ─── ADD NEW SONG FORM ─── */}
+              <div className="p-4 bg-[var(--bg-main)] border-2 sm:border-3 border-black space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-black">
+                  <span className="text-xs font-black uppercase text-[#00aa44] dark:text-[#00ff66]">
+                    + Tambah Lagu Baru ke Playlist:
+                  </span>
+                  {isUploadingAudio && (
+                    <span className="text-[10px] font-black text-[#ffaa00] animate-pulse">
+                      Sedang mengupload audio...
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-black uppercase mb-1 block">
+                      Judul Lagu:
+                    </label>
+                    <input
+                      type="text"
+                      value={newSongTitle}
+                      onChange={(e) => setNewSongTitle(e.target.value)}
+                      placeholder="Contoh: Lagu Keren 2"
+                      className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-3 py-2 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-black uppercase mb-1 block">
+                      Nama Artis:
+                    </label>
+                    <input
+                      type="text"
+                      value={newSongArtist}
+                      onChange={(e) => setNewSongArtist(e.target.value)}
+                      placeholder="Contoh: Muhammad Dafa Pratama"
+                      className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-3 py-2 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff]"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="text-xs font-black uppercase mb-1.5 block">
-                    Judul Lagu (Track Title):
+                  <label className="text-[11px] font-black uppercase mb-1 block">
+                    File Audio (.mp3):
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      ref={audioFileInputRef}
+                      type="file"
+                      accept="audio/*"
+                      onChange={handleUploadAudioFile}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      disabled={isUploadingAudio}
+                      onClick={() => audioFileInputRef.current?.click()}
+                      className="px-4 py-2 bg-[#00f0ff] text-black border-2 border-black font-black text-xs uppercase shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none flex items-center justify-center gap-1.5 flex-shrink-0"
+                    >
+                      <UploadIcon className="w-3.5 h-3.5" />
+                      <span>{isUploadingAudio ? "Mengupload..." : "Pilih File MP3"}</span>
+                    </button>
+                    <input
+                      type="text"
+                      value={newSongUrl}
+                      onChange={(e) => setNewSongUrl(e.target.value)}
+                      placeholder="Atau tempel link audio MP3 langsung..."
+                      className="flex-1 bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-3 py-2 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-black uppercase mb-1 block">
+                    Thumbnail Lagu (opsional):
                   </label>
                   <input
                     type="text"
-                    value={form.musicTitle}
-                    onChange={(e) => setForm((prev) => ({ ...prev, musicTitle: e.target.value }))}
-                    placeholder="Contoh: audio2"
-                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
+                    value={newSongThumb}
+                    onChange={(e) => setNewSongThumb(e.target.value)}
+                    placeholder="URL gambar thumbnail lagu (kosongkan untuk pakai thumbnail CD)..."
+                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-3 py-2 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff]"
                   />
                 </div>
-                <div>
-                  <label className="text-xs font-black uppercase mb-1.5 block">
-                    Nama Artis / Musisi:
-                  </label>
-                  <input
-                    type="text"
-                    value={form.musicArtist}
-                    onChange={(e) => setForm((prev) => ({ ...prev, musicArtist: e.target.value }))}
-                    placeholder="Contoh: Muhammad Dafa Pratama"
-                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
-                  />
-                </div>
-              </div>
 
-              {/* Audio Preview */}
-              <div className="p-4 bg-[var(--bg-main)] border-2 border-black">
-                <p className="text-xs font-black uppercase mb-2">Test Putar Audio Saat Ini:</p>
-                <audio controls src={form.musicUrl} className="w-full h-10 border border-black" />
+                <button
+                  type="button"
+                  onClick={handleAddSong}
+                  className="w-full py-3 bg-[#00ff66] text-black border-2 border-black font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span>+ Tambahkan ke Playlist</span>
+                </button>
               </div>
             </div>
           )}
@@ -338,7 +589,7 @@ export default function AdminDashPage() {
             <div className="space-y-6">
               <div className="pb-3 border-b-2 border-black flex items-center justify-between">
                 <div>
-                  <h2 className="text-base font-black uppercase text-[var(--text-main)]">
+                  <h2 className="text-base font-black uppercase">
                     Pengaturan QRIS & Nomor Donasi
                   </h2>
                   <p className="text-xs opacity-70 mt-0.5">
@@ -390,7 +641,7 @@ export default function AdminDashPage() {
                       setQrisPreview(e.target.value);
                     }}
                     placeholder="/qris.jpeg atau https://..."
-                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-3 py-2 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff]"
+                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-3 py-2 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff]"
                   />
                 </div>
               </div>
@@ -406,7 +657,7 @@ export default function AdminDashPage() {
                     value={form.danaNumber}
                     onChange={(e) => setForm((prev) => ({ ...prev, danaNumber: e.target.value }))}
                     placeholder="085120170735"
-                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
+                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
                   />
                 </div>
                 <div>
@@ -418,7 +669,7 @@ export default function AdminDashPage() {
                     value={form.gopayNumber}
                     onChange={(e) => setForm((prev) => ({ ...prev, gopayNumber: e.target.value }))}
                     placeholder="0895393325895"
-                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
+                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
                   />
                 </div>
               </div>
@@ -433,7 +684,7 @@ export default function AdminDashPage() {
                   value={form.saweriaUrl}
                   onChange={(e) => setForm((prev) => ({ ...prev, saweriaUrl: e.target.value }))}
                   placeholder="https://saweria.co/dafaaaaa1111"
-                  className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
+                  className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
                 />
               </div>
             </div>
@@ -444,7 +695,7 @@ export default function AdminDashPage() {
             <div className="space-y-6">
               <div className="pb-3 border-b-2 border-black flex items-center justify-between">
                 <div>
-                  <h2 className="text-base font-black uppercase text-[var(--text-main)]">
+                  <h2 className="text-base font-black uppercase">
                     Pengaturan Kontak & Username Media Sosial
                   </h2>
                   <p className="text-xs opacity-70 mt-0.5">
@@ -465,7 +716,7 @@ export default function AdminDashPage() {
                     value={form.telegramUsername}
                     onChange={(e) => setForm((prev) => ({ ...prev, telegramUsername: e.target.value.replace("@", "") }))}
                     placeholder="dafaaaaa11111"
-                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
+                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
                   />
                   <p className="text-[10px] opacity-60 mt-1">Link hasil: t.me/{form.telegramUsername}</p>
                 </div>
@@ -478,7 +729,7 @@ export default function AdminDashPage() {
                     value={form.whatsappNumber}
                     onChange={(e) => setForm((prev) => ({ ...prev, whatsappNumber: e.target.value }))}
                     placeholder="0895393325895"
-                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
+                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
                   />
                 </div>
               </div>
@@ -494,7 +745,7 @@ export default function AdminDashPage() {
                     value={form.instagramUsername}
                     onChange={(e) => setForm((prev) => ({ ...prev, instagramUsername: e.target.value.replace("@", "") }))}
                     placeholder="dafaaaaa11111"
-                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
+                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
                   />
                 </div>
                 <div>
@@ -506,7 +757,7 @@ export default function AdminDashPage() {
                     value={form.tiktokUsername}
                     onChange={(e) => setForm((prev) => ({ ...prev, tiktokUsername: e.target.value.replace("@", "") }))}
                     placeholder="dafaaaaa11111"
-                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
+                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
                   />
                 </div>
               </div>
@@ -522,7 +773,7 @@ export default function AdminDashPage() {
                     value={form.waGroupUrl}
                     onChange={(e) => setForm((prev) => ({ ...prev, waGroupUrl: e.target.value }))}
                     placeholder="https://chat.whatsapp.com/..."
-                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
+                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
                   />
                 </div>
                 <div>
@@ -534,7 +785,7 @@ export default function AdminDashPage() {
                     value={form.waChannelUrl}
                     onChange={(e) => setForm((prev) => ({ ...prev, waChannelUrl: e.target.value }))}
                     placeholder="https://whatsapp.com/channel/..."
-                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-mono font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
+                    className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-xs font-bold placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] shadow-[2px_2px_0px_#000]"
                   />
                 </div>
               </div>
@@ -545,7 +796,7 @@ export default function AdminDashPage() {
           {activeTab === "display" && (
             <div className="space-y-6">
               <div className="pb-3 border-b-2 border-black">
-                <h2 className="text-base font-black uppercase text-[var(--text-main)]">
+                <h2 className="text-base font-black uppercase">
                   Tampilan & Background
                 </h2>
                 <p className="text-xs opacity-70 mt-0.5">
@@ -581,7 +832,7 @@ export default function AdminDashPage() {
           {activeTab === "security" && (
             <div className="space-y-6">
               <div className="pb-3 border-b-2 border-black">
-                <h2 className="text-base font-black uppercase text-[var(--text-main)]">
+                <h2 className="text-base font-black uppercase">
                   Keamanan & PIN Masuk Admin
                 </h2>
                 <p className="text-xs opacity-70 mt-0.5">

@@ -2,12 +2,20 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 
+export interface Song {
+  id: string;
+  title: string;
+  artist: string;
+  url: string;
+  thumbnail?: string;
+}
+
 export interface SiteConfig {
-  // Audio Player
+  // Audio Player & Playlist
   musicEnabled: boolean;
-  musicUrl: string;
-  musicTitle: string;
-  musicArtist: string;
+  cdCustomThumbnail: string;
+  playlist: Song[];
+  activeSongIndex: number;
 
   // Background & Display
   bgEffectEnabled: boolean;
@@ -33,9 +41,17 @@ export interface SiteConfig {
 
 export const DEFAULT_CONFIG: SiteConfig = {
   musicEnabled: true,
-  musicUrl: "https://raw.githubusercontent.com/dapss-git/uploader/main/upload/audio/audio2.mp3",
-  musicTitle: "audio2",
-  musicArtist: "Muhammad Dafa Pratama",
+  cdCustomThumbnail: "/hero-banner.jpg",
+  playlist: [
+    {
+      id: "1",
+      title: "audio2",
+      artist: "Muhammad Dafa Pratama",
+      url: "https://raw.githubusercontent.com/dapss-git/uploader/main/upload/audio/audio2.mp3",
+      thumbnail: "/hero-banner.jpg",
+    },
+  ],
+  activeSongIndex: 0,
 
   bgEffectEnabled: true,
 
@@ -80,6 +96,22 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        // Migration support if older config had single musicUrl
+        if (!parsed.playlist && parsed.musicUrl) {
+          parsed.playlist = [
+            {
+              id: "1",
+              title: parsed.musicTitle || "audio2",
+              artist: parsed.musicArtist || "Muhammad Dafa Pratama",
+              url: parsed.musicUrl,
+              thumbnail: "/hero-banner.jpg",
+            },
+          ];
+          parsed.activeSongIndex = 0;
+        }
+        if (!parsed.cdCustomThumbnail) {
+          parsed.cdCustomThumbnail = "/hero-banner.jpg";
+        }
         setConfig((prev) => ({ ...prev, ...parsed }));
       }
     } catch (e) {
