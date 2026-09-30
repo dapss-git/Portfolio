@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
       msg?.video?.file_id ||
       "";
 
-    let fileUrl = "";
+    let filePath = "";
     if (fileId) {
       try {
         const getFileRes = await fetch(
@@ -144,10 +144,14 @@ export async function POST(req: NextRequest) {
         );
         const getFileData = await getFileRes.json();
         if (getFileData.ok && getFileData.result?.file_path) {
-          fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${getFileData.result.file_path}`;
+          filePath = getFileData.result.file_path;
         }
       } catch {}
     }
+
+    const host = req.headers.get("host") || "daps.my.id";
+    const protocol = req.headers.get("x-forwarded-proto") || "https";
+    const mediaUrl = filePath ? `${protocol}://${host}/f/${filePath}` : "";
 
     return NextResponse.json({
       success: true,
@@ -155,7 +159,8 @@ export async function POST(req: NextRequest) {
       file_size: formatBytes(file.size),
       file_type: fileTypeLabel,
       file_id: fileId,
-      file_url: fileUrl,
+      file_path: filePath,
+      media_url: mediaUrl,
     });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Internal server error";

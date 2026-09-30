@@ -14,6 +14,7 @@ interface UploadResult {
   file_id: string;
   file_path: string;
   masked_url: string;
+  direct_media_url: string;
 }
 
 const BOT_TOKEN = "8860804193:AAFbpvZGiIC-mtMMx1ugfZtJYVWbQXKROAA";
@@ -56,7 +57,8 @@ export default function UploaderPage() {
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<UploadResult | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copiedDirect, setCopiedDirect] = useState(false);
+  const [copiedWeb, setCopiedWeb] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -212,6 +214,9 @@ export default function UploaderPage() {
         ? `${currentOrigin}/uploader?view=${encodeURIComponent(filePath)}&name=${encodeURIComponent(selectedFile.name)}`
         : `${currentOrigin}/uploader`;
 
+      // Direct Raw Media Stream URL (returns media binary for Bots, NOT HTML!)
+      const directMediaUrl = filePath ? `${currentOrigin}/f/${filePath}` : "";
+
       const uploadResult: UploadResult = {
         file_name: selectedFile.name,
         file_size: formatBytes(selectedFile.size),
@@ -219,6 +224,7 @@ export default function UploaderPage() {
         file_id: fileId,
         file_path: filePath,
         masked_url: maskedUrl,
+        direct_media_url: directMediaUrl,
       };
 
       clearInterval(progressInterval);
@@ -236,11 +242,18 @@ export default function UploaderPage() {
     }
   };
 
-  const handleCopyLink = () => {
+  const handleCopyDirect = () => {
+    if (!result?.direct_media_url) return;
+    navigator.clipboard.writeText(result.direct_media_url);
+    setCopiedDirect(true);
+    setTimeout(() => setCopiedDirect(false), 2000);
+  };
+
+  const handleCopyWeb = () => {
     if (!result?.masked_url) return;
     navigator.clipboard.writeText(result.masked_url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopiedWeb(true);
+    setTimeout(() => setCopiedWeb(false), 2000);
   };
 
   const handleDownloadViewedFile = async () => {
@@ -274,7 +287,8 @@ export default function UploaderPage() {
     setProgress(0);
     setResult(null);
     setErrorMsg("");
-    setCopied(false);
+    setCopiedDirect(false);
+    setCopiedWeb(false);
     setViewMode(null);
     if (typeof window !== "undefined") {
       window.history.pushState({}, "", "/uploader");
@@ -469,14 +483,65 @@ export default function UploaderPage() {
               </p>
             </div>
 
-            {/* ─── CLEAN MASKED URL BOX (No Telegram Token!) ─── */}
+            {/* ─── 1. DIRECT RAW MEDIA URL (FOR BOTS, SCRAPERS, CURL) ─── */}
+            {result.direct_media_url && (
+              <div className="w-full bg-[var(--bg-main)] border-2 border-black p-3.5 text-left space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-black uppercase text-[#00aa44] dark:text-[#00ff66]">
+                    ⚡ Link Media Asli (Untuk Bot Telegram / Python / Web):
+                  </span>
+                  <span className="text-[9px] px-1.5 py-0.5 bg-[#00ff66] text-black border border-black font-bold">
+                    RAW MEDIA · BUKAN HTML
+                  </span>
+                </div>
+                <p className="text-[10px] opacity-70">
+                  Gunakan link ini di bot kamu. Saat di-GET oleh bot, langsung menerima file media (foto/audio/pdf/dll), BUKAN halaman web HTML!
+                </p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={result.direct_media_url}
+                    className="flex-1 bg-white dark:bg-[#18181f] text-black dark:text-white border-2 border-black px-2.5 py-2 text-xs font-bold truncate select-all focus:outline-none"
+                  />
+                  <button
+                    onClick={handleCopyDirect}
+                    className="px-3 py-2 bg-[#00ff66] text-black border-2 border-black font-black text-xs uppercase shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1 flex-shrink-0"
+                  >
+                    {copiedDirect ? (
+                      <>
+                        <CheckIcon className="w-3.5 h-3.5 stroke-[3]" />
+                        <span>Disalin!</span>
+                      </>
+                    ) : (
+                      <>
+                        <CopyIcon className="w-3.5 h-3.5 stroke-[2.5]" />
+                        <span>Salin Link Bot</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <div className="flex gap-3 text-[11px] font-black">
+                  <a
+                    href={result.direct_media_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-[#0066ff] dark:text-[#00f0ff]"
+                  >
+                    Buka File Media Asli ↗
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* ─── 2. WEB PREVIEW PAGE LINK (FOR HUMANS) ─── */}
             <div className="w-full bg-[var(--bg-main)] border-2 border-black p-3 text-left">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] font-black uppercase">
-                  Link Berbagi File (Resmi):
+                <span className="text-[11px] font-black uppercase opacity-75">
+                  Link Halaman Web (Preview di Browser):
                 </span>
-                <span className="text-[9px] px-1.5 py-0.5 bg-[#00ff66] text-black border border-black font-bold">
-                  TOKEN TELEGRAM DISAMARKAN
+                <span className="text-[9px] px-1.5 py-0.5 bg-[#FFE135] text-black border border-black font-bold">
+                  PREVIEW WEB
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -487,10 +552,10 @@ export default function UploaderPage() {
                   className="flex-1 bg-white dark:bg-[#18181f] text-black dark:text-white border-2 border-black px-2.5 py-2 text-xs font-bold truncate select-all focus:outline-none"
                 />
                 <button
-                  onClick={handleCopyLink}
+                  onClick={handleCopyWeb}
                   className="px-3 py-2 bg-[#FFE135] text-black border-2 border-black font-black text-xs uppercase shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1 flex-shrink-0"
                 >
-                  {copied ? (
+                  {copiedWeb ? (
                     <>
                       <CheckIcon className="w-3.5 h-3.5 stroke-[3]" />
                       <span>Disalin!</span>
@@ -502,16 +567,6 @@ export default function UploaderPage() {
                     </>
                   )}
                 </button>
-              </div>
-              <div className="mt-2 flex gap-3 text-[11px] font-black">
-                <a
-                  href={result.masked_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline text-[#0066ff] dark:text-[#00f0ff]"
-                >
-                  Buka Link di Tab Baru ↗
-                </a>
               </div>
             </div>
 
