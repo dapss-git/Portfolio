@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { ThemeProvider } from "./ThemeContext";
 import { LanguageProvider } from "./LanguageContext";
+import { ConfigProvider } from "./ConfigContext";
 import AudioPlayer from "./AudioPlayer";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -73,12 +74,14 @@ export default function RootLayout({
   return (
     <html lang="id" className="scroll-smooth">
       <body className={`${inter.className}`}>
-        <ThemeProvider>
-          <LanguageProvider>
-            {children}
-            <AudioPlayer />
-          </LanguageProvider>
-        </ThemeProvider>
+        <ConfigProvider>
+          <ThemeProvider>
+            <LanguageProvider>
+              {children}
+              <AudioPlayer />
+            </LanguageProvider>
+          </ThemeProvider>
+        </ConfigProvider>
       </body>
     </html>
   );

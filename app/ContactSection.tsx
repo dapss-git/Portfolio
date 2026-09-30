@@ -177,7 +177,7 @@ export default function ContactSection() {
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   disabled={status === "loading"}
-                  className="w-full bg-[var(--bg-main)] border-2 border-black px-4 py-3 text-sm font-mono font-medium text-[var(--text-main)] placeholder-gray-500 shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-white dark:focus:bg-[#121218] transition-all disabled:opacity-50"
+                  className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-sm font-mono font-bold placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-[2px_2px_0px_#000] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:bg-white dark:focus:bg-[#1c1c24] focus:text-black dark:focus:text-white transition-all disabled:opacity-50"
                 />
               </div>
 
@@ -192,7 +192,7 @@ export default function ContactSection() {
                   value={form.contact}
                   onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))}
                   disabled={status === "loading"}
-                  className="w-full bg-[var(--bg-main)] border-2 border-black px-4 py-3 text-sm font-mono font-medium text-[var(--text-main)] placeholder-gray-500 shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-white dark:focus:bg-[#121218] transition-all disabled:opacity-50"
+                  className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-sm font-mono font-bold placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-[2px_2px_0px_#000] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:bg-white dark:focus:bg-[#1c1c24] focus:text-black dark:focus:text-white transition-all disabled:opacity-50"
                 />
               </div>
 
@@ -207,7 +207,7 @@ export default function ContactSection() {
                   value={form.message}
                   onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
                   disabled={status === "loading"}
-                  className="w-full bg-[var(--bg-main)] border-2 border-black px-4 py-3 text-sm font-mono font-medium text-[var(--text-main)] placeholder-gray-500 shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-white dark:focus:bg-[#121218] transition-all resize-none disabled:opacity-50"
+                  className="w-full bg-white dark:bg-[#1c1c24] text-black dark:text-white border-2 border-black px-4 py-3 text-sm font-mono font-bold placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-[2px_2px_0px_#000] focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] focus:bg-white dark:focus:bg-[#1c1c24] focus:text-black dark:focus:text-white transition-all resize-none disabled:opacity-50"
                 />
               </div>
 

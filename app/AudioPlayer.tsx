@@ -2,9 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { PlayIcon, PauseIcon, MusicIcon, XIcon } from "./Icons";
+import { useSiteConfig } from "./ConfigContext";
 
-const AUDIO_URL =
-  "https://raw.githubusercontent.com/dapss-git/uploader/main/upload/audio/audio2.mp3";
 const AVATAR_URL = "/hero-banner.jpg";
 
 // ─── CSS Animation (injected once into <style>) ──────────────────────────────
@@ -36,6 +35,7 @@ function formatTime(s: number): string {
 }
 
 export default function AudioPlayer() {
+  const { config } = useSiteConfig();
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -100,7 +100,7 @@ export default function AudioPlayer() {
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  if (!mounted || dismissed) return null;
+  if (!mounted || dismissed || !config.musicEnabled) return null;
 
   return (
     <>
@@ -108,7 +108,7 @@ export default function AudioPlayer() {
       <style>{SPIN_STYLE}</style>
 
       {/* Hidden audio element */}
-      <audio ref={audioRef} src={AUDIO_URL} preload="metadata" loop={false} />
+      <audio ref={audioRef} src={config.musicUrl} preload="metadata" loop={false} />
 
       {/* ─── Minimized pill ──────────────────────────────────────────── */}
       {minimized ? (
@@ -215,10 +215,10 @@ export default function AudioPlayer() {
             {/* Track info */}
             <div className="flex-1 min-w-0">
               <p className="text-xs font-black uppercase truncate text-[var(--text-main)] leading-tight">
-                audio2
+                {config.musicTitle}
               </p>
               <p className="text-[10px] text-[var(--text-main)] opacity-60 truncate mt-0.5">
-                Muhammad Dafa Pratama
+                {config.musicArtist}
               </p>
               {/* Time */}
               <p className="text-[10px] text-[var(--text-main)] opacity-50 mt-1 font-bold">

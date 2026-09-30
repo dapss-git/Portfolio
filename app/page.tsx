@@ -7,6 +7,7 @@ import LoadingScreen from "./LoadingScreen";
 import ContactSection from "./ContactSection";
 import BirthdayCountdown from "./BirthdayCountdown";
 import { useLanguage } from "./LanguageContext";
+import { useSiteConfig } from "./ConfigContext";
 import {
   InstagramIcon,
   TikTokIcon,
@@ -106,10 +107,11 @@ function FadeSection({
 // ─── QRIS Modal ───────────────────────────────────────────────────────────────
 function QrisModal({ onClose }: { onClose: () => void }) {
   const { t } = useLanguage();
+  const { config } = useSiteConfig();
 
   const handleDownload = () => {
     const a = document.createElement("a");
-    a.href = "/qris.jpeg";
+    a.href = config.qrisImageUrl;
     a.download = "QRIS-DafaPratama.jpeg";
     a.click();
   };
@@ -141,7 +143,7 @@ function QrisModal({ onClose }: { onClose: () => void }) {
         <div className="border-3 border-black shadow-[4px_4px_0px_#000] overflow-hidden bg-white w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/qris.jpeg"
+            src={config.qrisImageUrl}
             alt="QRIS Payment Dafa Pratama"
             className="w-full h-auto object-contain"
           />
@@ -170,6 +172,7 @@ function PaymentSection() {
   const [showQris, setShowQris] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
   const { t } = useLanguage();
+  const { config } = useSiteConfig();
 
   const handleCopy = (num: string) => {
     navigator.clipboard.writeText(num);
@@ -205,13 +208,13 @@ function PaymentSection() {
             {[
               {
                 label: "Gopay & OVO",
-                number: "0895393325895",
+                number: config.gopayNumber,
                 icon: <WalletIcon className="w-5 h-5 text-black" />,
                 bg: "#00f0ff",
               },
               {
                 label: "Dana",
-                number: "085120170735",
+                number: config.danaNumber,
                 icon: <WalletIcon className="w-5 h-5 text-black" />,
                 bg: "#FFE135",
               },
@@ -259,7 +262,7 @@ function PaymentSection() {
 
           {/* Saweria Card */}
           <a
-            href="https://saweria.co/dafaaaaa1111"
+            href={config.saweriaUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full flex items-center gap-4 bg-[#FFE135] text-black border-2 sm:border-3 border-black p-4 sm:p-5 mb-4 shadow-[4px_4px_0px_#000] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
@@ -269,7 +272,7 @@ function PaymentSection() {
             </div>
             <div className="flex-1 text-left">
               <p className="font-mono font-black text-sm uppercase">{t.payment.saweriaTitle}</p>
-              <p className="text-xs font-mono font-bold opacity-80">saweria.co/dafaaaaa1111</p>
+              <p className="text-xs font-mono font-bold opacity-80">{config.saweriaUrl.replace("https://", "")}</p>
             </div>
             <span className="px-3 py-1.5 bg-black text-white border-2 border-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000]">
               {t.payment.saweriaOpen}
@@ -300,7 +303,7 @@ function PaymentSection() {
               <div className="w-14 h-14 bg-white border-2 border-black overflow-hidden flex-shrink-0 shadow-[2px_2px_0px_#000]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="/qris.jpeg"
+                  src={config.qrisImageUrl}
                   alt="QRIS Preview"
                   className="w-full h-full object-cover"
                 />
@@ -322,6 +325,7 @@ function PaymentSection() {
 export default function Home() {
   const [activeSection, setActiveSection] = useState("home");
   const { t, lang } = useLanguage();
+  const { config } = useSiteConfig();
 
   // Dynamic Looping Typewriter for Hero
   // Cycle 1: Hai, Saya -> Muhammad Dafa Pratama -> jeda -> hapus
@@ -426,42 +430,42 @@ export default function Home() {
     {
       icon: <InstagramIcon className="w-5 h-5 text-black" />,
       label: "Instagram",
-      href: "https://instagram.com/dafaaaaa11111",
-      username: "@dafaaaaa11111",
+      href: `https://instagram.com/${config.instagramUsername}`,
+      username: `@${config.instagramUsername}`,
       bg: "#ff70a6",
     },
     {
       icon: <TikTokIcon className="w-5 h-5 text-black" />,
       label: "TikTok",
-      href: "https://tiktok.com/@dafaaaaa11111",
-      username: "@dafaaaaa11111",
+      href: `https://tiktok.com/@${config.tiktokUsername}`,
+      username: `@${config.tiktokUsername}`,
       bg: "#00f0ff",
     },
     {
       icon: <FacebookIcon className="w-5 h-5 text-black" />,
       label: "Facebook",
-      href: "https://facebook.com/dafaaaaa11111",
-      username: "dafaaaaa11111",
+      href: `https://facebook.com/${config.facebookUsername}`,
+      username: config.facebookUsername,
       bg: "#8338ec",
     },
     {
       icon: <TelegramIcon className="w-5 h-5 text-black" />,
       label: "Telegram",
-      href: "https://t.me/dafaaaaa11111",
-      username: "@dafaaaaa11111",
+      href: `https://t.me/${config.telegramUsername}`,
+      username: `@${config.telegramUsername}`,
       bg: "#00f0ff",
     },
     {
       icon: <WhatsAppIcon className="w-5 h-5 text-black" />,
       label: "WhatsApp",
-      href: "https://wa.me/62895393325895",
-      username: "+62 895-393-325-895",
+      href: `https://wa.me/${config.whatsappNumber.replace(/[^0-9]/g, "")}`,
+      username: config.whatsappNumber,
       bg: "#00ff66",
     },
     {
       icon: <BroadcastIcon className="w-5 h-5 text-black" />,
       label: "WA Channel",
-      href: "https://whatsapp.com/channel/0029Vb89x3U5fM5VSAMCHQ16",
+      href: config.waChannelUrl,
       username: "Channel Dafa",
       bg: "#FFE135",
     },
@@ -521,7 +525,7 @@ export default function Home() {
                   <span>→</span>
                 </a>
                 <a
-                  href="https://wa.me/62895393325895"
+                  href={`https://wa.me/${config.whatsappNumber.replace(/[^0-9]/g, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-5 py-3 bg-[#00ff66] text-black font-black font-mono text-xs uppercase tracking-wider border-2 border-black shadow-[3px_3px_0px_#000] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
@@ -771,7 +775,7 @@ export default function Home() {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <a
-                    href="https://chat.whatsapp.com/BA2BZeMGysXGOJI0JxF8Yb"
+                    href={config.waGroupUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 inline-flex items-center justify-center gap-2 py-3 bg-[#00ff66] text-black border-2 border-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
@@ -780,7 +784,7 @@ export default function Home() {
                     <span>{t.skills.joinGroup}</span>
                   </a>
                   <a
-                    href="https://whatsapp.com/channel/0029Vb89x3U5fM5VSAMCHQ16"
+                    href={config.waChannelUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 inline-flex items-center justify-center gap-2 py-3 bg-[#00f0ff] text-black border-2 border-black font-mono font-black text-xs uppercase shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
