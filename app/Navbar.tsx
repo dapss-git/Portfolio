@@ -88,7 +88,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
               href="/uploader"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#00f0ff] text-black border-2 border-black font-mono font-bold text-xs shadow-[2px_2px_0px_#000] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
             >
-              <span>↑ Kirim File</span>
+              <span>↑ Upload</span>
             </Link>
 
             {/* Language & Theme switchers */}
@@ -179,7 +179,7 @@ export default function Navbar({ activeSection }: NavbarProps) {
             onClick={() => setMenuOpen(false)}
             className="w-full max-w-xs py-3 text-lg font-black font-mono uppercase tracking-wider border-2 border-black bg-[#00f0ff] text-black shadow-[4px_4px_0px_#000] text-center flex items-center justify-center gap-2"
           >
-            <span>↑ Kirim File / Uploader</span>
+            <span>↑ Upload File</span>
           </Link>
         </div>
       </div>
