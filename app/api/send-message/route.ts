@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BOT_TOKEN =
   process.env.TELEGRAM_BOT_TOKEN ||
-  "8860804193:AAFbpvZGiIC-mtMMx1ugfZtJYVWbQXKROAA";
+  "8860804193:AAFPUlkwXYoYG9KqzqZ48il2wzB0zISCiyU";
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID || "8136654727";
 
 function escapeHtml(str: string): string {
