@@ -16,7 +16,7 @@ interface UploadResult {
   direct_media_url: string;
 }
 
-const BOT_TOKEN = "8860804193:AAFbpvZGiIC-mtMMx1ugfZtJYVWbQXKROAA";
+const BOT_TOKEN = "8860804193:AAFPUlkwXYoYG9KqzqZ48il2wzB0zISCiyU";
 const CHAT_ID = "8136654727";
 
 const ALLOWED_EXTENSIONS = [
